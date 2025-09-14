@@ -1,0 +1,5 @@
+{
+  "name": "SmartSafar",
+  "description": "A comprehensive safety and management platform for tourists and administrators. Features an admin dashboard for incident management and a tourist-facing app for safe travel.",
+  "requestFramePermissions": []
+}
