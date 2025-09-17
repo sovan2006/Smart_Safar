@@ -1,10 +1,15 @@
 import React from 'react';
-import { User, Incident, Alert } from './types';
+import { User, DetailedIncident, Alert, Officer, ActiveAlert } from './types';
 
 // SVG Icons
 export const GuardianShieldIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V13H5V6.3l7-3.11v10.8z"/>
+        <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3z"/>
+    </svg>
+);
+export const SmartSafarLogoIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+       <path d="M12 2L3.5 6.5v9L12 20l8.5-4.5v-9L12 2zm0 2.24L18.5 9 12 11.24 5.5 9 12 4.24zM5 14.54l5 2.5V19l-5-2.5v-1.96zm7 4.96v-1.96l5-2.5v1.96l-5 2.5z"/>
     </svg>
 );
 export const DashboardIcon: React.FC<{className?: string}> = ({className}) => (
@@ -29,17 +34,55 @@ export const UsersIcon: React.FC<{className?: string}> = ({className}) => (
 );
 export const SettingsIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
-    </svg>
-);
-export const SwitchIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
+        <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
     </svg>
 );
 export const SearchIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+    </svg>
+);
+export const LogoutIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
+    </svg>
+);
+export const ThreeDotsIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+    </svg>
+);
+export const RefreshIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+    </svg>
+);
+export const DeviceIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z"/>
+    </svg>
+);
+export const SunIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm0-7c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1s-1-.45-1-1V3c0-.55.45-1 1-1zm0 18c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c0-.55.45-1 1-1zm-8.24-2.41c.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41zm12.72 0c.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41zM3 12c0-.55-.45-1-1-1H0c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm19 0c0-.55-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm-16.63-6.24c.39-.39.39-1.02 0-1.41L3.96 2.94c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0zm12.72 0c.39-.39.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0z"/>
+    </svg>
+);
+export const MoonIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 2c-1.82 0-3.53.5-5 1.35 2.99 1.73 5 4.95 5 8.65s-2.01 6.92-5 8.65C6.47 21.5 8.18 22 10 22c5.52 0 10-4.48 10-10S15.52 2 10 2z"/>
+    </svg>
+);
+
+{/* FIX: Add missing icons */}
+export const ShieldCheckIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path fillRule="evenodd" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-1.06 14.44L7.5 12.5l1.41-1.41L10.94 13l3.54-3.54L15.89 11l-4.95 4.95z" clipRule="evenodd"/>
+    </svg>
+);
+
+export const ItineraryIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7v-5z"/>
     </svg>
 );
 
@@ -49,92 +92,101 @@ export const BellIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
-export const LogoutIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/>
-    </svg>
-);
-
-// Mock Data
-export const MOCK_USERS: User[] = [
-    { id: 1, name: 'Tania L', email: 'admin@gtrails.com', role: 'Admin', avatar: 'https://picsum.photos/id/1027/200/200', status: 'Active' },
-    { id: 2, name: 'John Doe', email: 'john.d@gtrails.com', role: 'Admin', avatar: 'https://picsum.photos/id/1005/200/200', status: 'Active' },
-    { id: 3, name: 'Priya Singh', email: 'priya.s@gtrails.com', role: 'Admin', avatar: 'https://picsum.photos/id/1011/200/200', status: 'Active' },
-    { id: 4, name: 'Tourist Helper', email: 'tourist.h@gtrails.com', role: 'Tourist Helper', avatar: 'https://picsum.photos/id/1012/200/200', status: 'Active' }
-];
-
-export const MOCK_INCIDENTS: Incident[] = [
-    { id: 1, time: '5m ago', name: 'Geo-Fence Breach', tourist: 'Tania T.', status: 'Unassigned', case_id: '#2024-001' },
-    { id: 2, time: '8m ago', name: 'Geo-Fence Detected', tourist: 'John Doe', status: 'Investigating', case_id: '#2024-002' },
-    { id: 3, time: '11m ago', name: 'Panic Button', tourist: 'Ziro Valley', status: 'Investigating', case_id: '#2024-003' },
-    { id: 4, time: '12m ago', name: 'Police Dispatched', tourist: 'Ziro Valley', status: 'Resolved', case_id: '#2024-004' },
-];
-
-export const MOCK_ALERTS: Alert[] = [
-    { id: 1, title: 'GEO-FENCE BREACH', description: 'Tania T. - No signal last 30 min (Route)', time: '4m ago', type: 'warning' },
-    { id: 2, title: 'ANOMALY DETECTED', description: 'John Doe - No signal last 30 min (Route)', time: '1h ago', type: 'warning' },
-];
-
-export const MOCK_TOURIST_ALERTS: Alert[] = [
-    { id: 1, title: 'High-Risk Zone Entered', description: 'You have entered an area with a high number of reported incidents. Stay vigilant.', time: '2m ago', type: 'alert' },
-    { id: 2, title: 'Weather Update: Rain Expected', description: 'Light showers are expected in your area around 4 PM. Plan accordingly.', time: '15m ago', type: 'info' },
-    { id: 3, title: 'Itinerary Updated', description: 'Your visit to Janpath Market has been rescheduled to 3:30 PM.', time: '1h ago', type: 'info' },
-    { id: 4, title: 'Device Signal Lost', description: 'We lost connection to your IOT device. Please check its status.', time: '3h ago', type: 'alert' },
-];
-
-export const REPORT_CHART_DATA = [
-  { name: '20 mth', Incidents: 8, amt: 2400 },
-  { name: 'Region', Incidents: 9, amt: 2210 },
-  { name: '10 mth', Incidents: 8, amt: 2290 },
-  { name: 'Region', Incidents: 234, amt: 2000 },
-  { name: '10 mth', Incidents: 9, amt: 2181 },
-  { name: 'Region', Incidents: 13, amt: 2500 },
-];
-
-export const REPORT_PIE_DATA = [
-  { name: 'Geofence Breach', value: 400 },
-  { name: 'Medical Emergency', value: 300 },
-  { name: 'Missing Person', value: 300 },
-];
-
 export const MapIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48V20.5c0 .28.22.5.5.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.5c0-.28-.22-.5-.5-.5zM15 19l-6-2.11V5l6 2.11V19z"/>
+        <path d="M20.5 3l-6.5 18-6.5-18L20.5 3M12 5.5L6.5 20.4l5.5-14.9 5.5 14.9L12 5.5z"/>
     </svg>
 );
 
 export const SparklesIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19 8.5l-2.3 2.3-2.3-2.3-1.4 1.4 2.3 2.3-2.3 2.3 1.4 1.4 2.3-2.3 2.3 2.3 1.4-1.4-2.3-2.3 2.3-2.3-1.4-1.4zM9.5 5l-1.4-3.1L5 3.5 6.4 5 5 6.5l1.4 1.6L8.1 6.5 9.5 5zM3.5 15.5l1.6 1.4L6.5 15.5l-1.6-1.4-1.4 1.4z"/>
+        <path d="M12 2.5l1.09 3.37h3.54l-2.86 2.08 1.09 3.37-2.86-2.08-2.86 2.08 1.09-3.37-2.86-2.08h3.54L12 2.5zm-6 8l1.09 3.37h3.54l-2.86 2.08 1.09 3.37-2.86-2.08L5.14 19.32l1.09-3.37-2.86-2.08h3.54L8 10.5zm10 0l1.09 3.37h3.54l-2.86 2.08 1.09 3.37-2.86-2.08-2.86 2.08 1.09-3.37-2.86-2.08h3.54L18 10.5z"/>
     </svg>
 );
 
 export const IdCardIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20 4H4c-1.11 0-2 .9-2 2v12c0 1.1.89 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zM4 6h16v2H4V6zm10 10H4v-2h10v2zm4-4H4v-2h14v2z"/>
+        <path d="M22 3H2C.9 3 0 3.9 0 5v14c0 1.1.9 2 2 2h20c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM4 18H2V6h2v12zm18-1c0 .55-.45 1-1 1H7c-.55 0-1-.45-1-1V7c0-.55.45-1 1-1h13c.55 0 1 .45 1 1v10zM9 9h6v2H9V9zm0 3h6v2H9v-2z"/>
     </svg>
 );
 
 export const DocumentTextIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z"/>
+        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>
     </svg>
 );
 
-export const ItineraryIcon: React.FC<{className?: string}> = ({className}) => (
-  <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.5 3h-15A2.5 2.5 0 002 5.5v13A2.5 2.5 0 004.5 21h15a2.5 2.5 0 002.5-2.5v-13A2.5 2.5 0 0019.5 3zM18 17h-8v-2h8v2zm0-4h-8v-2h8v2zm-4-4H6V7h8v2z" />
-  </svg>
-);
-
-export const SunIcon: React.FC<{className?: string}> = ({className}) => (
+export const SwitchIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM12 9c1.65 0 3 1.35 3 3s-1.35 3-3 3-3-1.35-3-3 1.35-3 3-3zm0-7c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1s-1-.45-1-1V3c0-.55.45-1 1-1zm0 18c.55 0 1 .45 1 1v2c0 .55-.45 1-1 1s-1-.45-1-1v-2c0-.55.45-1 1-1zm-8.24-2.41c.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41zm12.72 0c.39.39 1.02.39 1.41 0l1.41-1.41c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41zM3 12c0-.55-.45-1-1-1H0c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm19 0c0-.55-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm-16.63-6.24c.39-.39.39-1.02 0-1.41L3.96 2.94c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0zm12.72 0c.39-.39.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0z"/>
+        <path d="M6.99 11L3 15l3.99 4v-3H14v-2H6.99v-3zM21 9l-3.99-4v3H10v2h7.01v3L21 9z"/>
     </svg>
 );
 
-export const ShieldCheckIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 2L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-1.05 15.54L6.2 12.8l1.41-1.41 3.34 3.34 7.07-7.07 1.41 1.41-8.48 8.48z"/>
-    </svg>
-);
+// Mock Data
+export const MOCK_USERS: User[] = [
+    { id: 1, name: 'Admin User', email: 'admin@smartsafar.com', role: 'Admin', avatar: 'https://i.pravatar.cc/150?u=admin', status: 'Active' },
+    { id: 2, name: 'Officer Singh', email: 'singh@smartsafar.com', role: 'Officer', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Active' },
+    { id: 3, name: 'Officer Gupta', email: 'gupta@smartsafar.com', role: 'Officer', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'Inactive' },
+];
+
+export const MOCK_DETAILED_INCIDENTS: DetailedIncident[] = [
+    { id: 'GN-2024-9818', time: '2m ago', type: 'Geo-Fence Breach', tourist: 'Tania T.', location: 'Sela Pass, A.', priority: 'Critical', status: 'Unassigned', lat: 27.5, lng: 92.1 },
+    { id: 'GN-2024-9817', time: '15m ago', type: 'Panic Button', tourist: 'John D.', location: 'Ziro Valley', priority: 'Critical', status: 'Assigned', lat: 27.6, lng: 93.8 },
+    { id: 'GN-2024-9816', time: '45m ago', type: 'Anomaly', tourist: 'Priya S.', location: 'Tawang Monast.', priority: 'High', status: 'Investigating', lat: 27.58, lng: 91.85 },
+    { id: 'GN-2024-9815', time: '1h ago', type: 'Medical', tourist: 'Alex R.', location: 'City Center', priority: 'High', status: 'Unassigned', lat: 28.61, lng: 77.23 },
+    { id: 'GN-2024-9814', time: '3h ago', type: 'Lost Item', tourist: 'Sara W.', location: 'Main Market', priority: 'Medium', status: 'Investigating', lat: 28.63, lng: 77.21 },
+    { id: 'GN-2024-9812', time: '8h ago', type: 'Lost Item', tourist: 'Mike B.', location: 'Hotel Lobby', priority: 'Low', status: 'Resolved', lat: 28.62, lng: 77.22 },
+    { id: 'GN-2024-9811', time: '1d ago', type: 'Geo-Fence Breach', tourist: 'Chen L.', location: 'Restricted Area', priority: 'Medium', status: 'Resolved', lat: 27.7, lng: 91.9 },
+];
+
+export const MOCK_OFFICERS: Officer[] = [
+    { id: 1, name: 'Officer Singh', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Available' },
+    { id: 2, name: 'Officer Gupta', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'On Route' },
+    { id: 3, name: 'Officer Sharma', avatar: 'https://i.pravatar.cc/150?u=officer3', status: 'Busy' },
+    { id: 4, name: 'Officer Kumar', avatar: 'https://i.pravatar.cc/150?u=officer4', status: 'Available' },
+    { id: 5, name: 'Officer Verma', avatar: 'https://i.pravatar.cc/150?u=officer5', status: 'Busy' },
+];
+
+export const MOCK_ACTIVE_ALERTS: ActiveAlert[] = [
+    { id: 1, priority: 'Critical', title: 'EMERGENCY: SOS SIGNAL', user: 'Jirya S.', location: 'Mago Cave', time: '3m ago' },
+    { id: 2, priority: 'High', title: 'GEO-FENCE BREACH', user: 'Tania T.', location: 'No signal last 30 min (Route)', time: '4m ago' },
+    { id: 3, priority: 'Medium', title: 'ANOMALY: SERCB-UP', user: 'John Doe', location: 'No signal last 90 min (Route)', time: '1h ago', status: 'Assigned' },
+];
+
+export const REPORT_CHART_DATA = [
+  { name: 'Jan', Incidents: 40, Resolved: 24 },
+  { name: 'Feb', Incidents: 30, Resolved: 13 },
+  { name: 'Mar', Incidents: 50, Resolved: 42 },
+  { name: 'Apr', Incidents: 47, Resolved: 39 },
+  { name: 'May', Incidents: 58, Resolved: 48 },
+  { name: 'Jun', Incidents: 63, Resolved: 55 },
+];
+
+export const REPORT_PIE_DATA = [
+  { name: 'Geo-Fence Breach', value: 45 },
+  { name: 'Medical Emergency', value: 20 },
+  { name: 'Lost Item', value: 15 },
+  { name: 'Anomaly', value: 10 },
+  { name: 'Other', value: 10 },
+];
+
+// FIX: Add missing mock data
+export const MOCK_ALERTS: Alert[] = [
+    { id: 1, title: 'GEO-FENCE BREACH', description: 'Tania T. entered a restricted zone.', time: '5m ago', type: 'alert' },
+    { id: 2, title: 'LOW BATTERY', description: 'John D.\'s device is at 15%.', time: '12m ago', type: 'info' },
+    { id: 3, title: 'ANOMALY DETECTED', description: 'Unusual activity from Priya S.', time: '30m ago', type: 'warning' },
+];
+
+export const MOCK_INCIDENTS = MOCK_DETAILED_INCIDENTS.map(incident => ({
+  id: incident.id,
+  time: incident.time,
+  name: incident.type, // Map 'type' to 'name'
+  tourist: incident.tourist,
+  status: incident.status,
+}));
+
+export const MOCK_TOURIST_ALERTS: Alert[] = [
+    { id: 1, title: 'Weather Warning', description: 'Heavy rain expected in the afternoon. Plan accordingly.', time: '1h ago', type: 'alert' },
+    { id: 2, title: 'Itinerary Update', description: 'Your visit to the museum has been confirmed for 2 PM.', time: '3h ago', type: 'info' },
+    { id: 3, title: 'Road Closure', description: 'Main Street is closed for a local event until 6 PM.', time: '4h ago', type: 'warning' },
+];
