@@ -1,4 +1,5 @@
 
+
 import React, { useState } from 'react';
 import Card from '../shared/Card';
 
@@ -26,7 +27,6 @@ interface SettingsState {
     anomalyDetection: boolean;
     panicButton: boolean;
     lowSignal: boolean;
-    blockchain: boolean;
     iotSync: boolean;
     efirAutomation: boolean;
 }
@@ -36,7 +36,6 @@ const initialSettings: SettingsState = {
     anomalyDetection: true,
     panicButton: true,
     lowSignal: false,
-    blockchain: false,
     iotSync: true,
     efirAutomation: false,
 };
@@ -76,7 +75,15 @@ const Settings: React.FC = () => {
       <Card>
           <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200 p-4 pb-0">System Integrations</h2>
            <div className="divide-y divide-light-200 dark:divide-dark-700">
-            <Toggle label="Blockchain ID Platform" description="Sync digital IDs with the national blockchain registry." isOn={settings.blockchain} onToggle={() => handleToggle('blockchain')} />
+            <div className="flex items-start justify-between p-4">
+              <div>
+                  <p className="font-semibold text-gray-800 dark:text-gray-200">Blockchain ID Platform</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">Sync digital IDs with the national blockchain registry.</p>
+              </div>
+              <span className="text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-500/20 dark:text-green-300 px-3 py-1 rounded-full flex-shrink-0">
+                  Active
+              </span>
+            </div>
             <Toggle label="IOT Device Sync" description="Enable real-time synchronization with tourist IOT devices." isOn={settings.iotSync} onToggle={() => handleToggle('iotSync')} />
             <Toggle label="E-FIR Automation" description="Automatically forward critical incident reports to local police." isOn={settings.efirAutomation} onToggle={() => handleToggle('efirAutomation')} />
           </div>

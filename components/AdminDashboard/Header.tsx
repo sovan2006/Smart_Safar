@@ -1,7 +1,9 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { SearchIcon, LogoutIcon, SettingsIcon, UsersIcon } from '../../constants';
 import DarkModeToggle from '../shared/DarkModeToggle';
+import { AdminPage } from '../../types';
 
 interface HeaderProps {
   isDarkMode: boolean;
@@ -10,9 +12,10 @@ interface HeaderProps {
   userName: string;
   onLogout: () => void;
   onToggleSidebar: () => void;
+  setActivePage: (page: AdminPage) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, pageTitle, userName, onLogout, onToggleSidebar }) => {
+const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, pageTitle, userName, onLogout, onToggleSidebar, setActivePage }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
@@ -29,6 +32,10 @@ const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, pageTitle
     };
   }, []);
 
+  const handleNav = (page: AdminPage) => {
+      setActivePage(page);
+      setIsProfileOpen(false);
+  }
 
   return (
     <header className="flex-shrink-0 h-16 bg-light-100 dark:bg-dark-800 flex items-center justify-between px-4 sm:px-6 border-b border-light-300 dark:border-dark-700">
@@ -73,14 +80,14 @@ const Header: React.FC<HeaderProps> = ({ isDarkMode, onToggleDarkMode, pageTitle
                             </div>
                         </div>
                         <nav className="p-2" role="none">
-                            <a href="#" className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700 rounded-md" role="menuitem">
+                            <button onClick={() => handleNav('Profile')} className="flex items-center w-full text-left space-x-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700 rounded-md" role="menuitem">
                                 <UsersIcon className="w-5 h-5" />
                                 <span>My Profile</span>
-                            </a>
-                            <a href="#" className="flex items-center space-x-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700 rounded-md" role="menuitem">
+                            </button>
+                            <button onClick={() => handleNav('Settings')} className="flex items-center w-full text-left space-x-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700 rounded-md" role="menuitem">
                                 <SettingsIcon className="w-5 h-5" />
                                 <span>Settings</span>
-                            </a>
+                            </button>
                         </nav>
                         <div className="p-2 border-t border-light-300 dark:border-dark-700">
                              <button onClick={onLogout} className="flex items-center space-x-3 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-md" role="menuitem">

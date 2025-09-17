@@ -1,5 +1,7 @@
+
 import React, { useState, useRef, ChangeEvent } from 'react';
 import { Tourist } from '../../../types';
+import { ChainIcon, CheckCircleIcon } from '../../../constants';
 
 interface DigitalIDScreenProps {
     currentUser: Tourist;
@@ -34,6 +36,35 @@ const DocumentViewerModal: React.FC<{ document: Document; onClose: () => void }>
     );
 };
 
+const BlockchainVerificationModal: React.FC<{ status: 'verifying' | 'verified'; onClose: () => void }> = ({ status, onClose }) => {
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 z-[60] flex items-center justify-center p-4" onClick={onClose}>
+            <div className="bg-light-100 dark:bg-dark-800 rounded-2xl shadow-xl p-6 w-full max-w-sm text-center" onClick={e => e.stopPropagation()}>
+                {status === 'verifying' ? (
+                    <>
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto mb-4"></div>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Verifying on Chain...</h3>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Checking credential against the SmartSafar distributed ledger.</p>
+                    </>
+                ) : (
+                    <>
+                        <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto mb-4"/>
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Verification Successful</h3>
+                        <div className="text-left bg-light-200 dark:bg-dark-700 p-3 rounded-lg mt-4 text-xs space-y-2">
+                            <p><strong>Status:</strong> <span className="text-green-600 dark:text-green-400">Verified</span></p>
+                            <p className="truncate"><strong>Transaction Hash:</strong> 0xab...f345</p>
+                            <p><strong>Block Number:</strong> 1,337,420</p>
+                        </div>
+                        <button onClick={onClose} className="mt-6 bg-primary-600 text-white font-semibold py-2 px-6 rounded-lg w-full">
+                            Close
+                        </button>
+                    </>
+                )}
+            </div>
+        </div>
+    )
+}
+
 
 const DigitalIDScreen: React.FC<DigitalIDScreenProps> = ({ currentUser }) => {
     const touristId = currentUser.touristId || `T-${currentUser.mobileNumber.slice(-5)}`;
@@ -44,6 +75,18 @@ const DigitalIDScreen: React.FC<DigitalIDScreenProps> = ({ currentUser }) => {
     const [searchQuery, setSearchQuery] = useState('');
     const [viewingDocument, setViewingDocument] = useState<Document | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const [isVerifying, setIsVerifying] = useState(false);
+    const [verificationStatus, setVerificationStatus] = useState<'verifying' | 'verified' | null>(null);
+    const blockchainHash = `0x${[...Array(40)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')}...`;
+
+    const handleVerify = () => {
+        setVerificationStatus('verifying');
+        setIsVerifying(true);
+        setTimeout(() => {
+            setVerificationStatus('verified');
+        }, 2000);
+    };
 
     const handleUploadClick = () => {
         fileInputRef.current?.click();
@@ -112,6 +155,22 @@ const DigitalIDScreen: React.FC<DigitalIDScreenProps> = ({ currentUser }) => {
             </div>
 
             <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
+                <div className="flex items-center space-x-2 mb-3">
+                    <ChainIcon className="w-5 h-5 text-primary-600 dark:text-primary-400" />
+                    <h2 className="font-semibold text-gray-900 dark:text-gray-100">Blockchain Verification</h2>
+                </div>
+                <div className="bg-light-200 dark:bg-dark-700 p-3 rounded-lg space-y-3">
+                    <div>
+                        <p className="text-xs font-semibold text-gray-500 dark:text-gray-400">IDENTITY HASH</p>
+                        <p className="font-mono text-sm text-gray-800 dark:text-gray-200 break-all">{blockchainHash}</p>
+                    </div>
+                     <button onClick={handleVerify} className="w-full bg-primary-600 text-white py-2 rounded-lg font-semibold transition-colors hover:bg-primary-700">
+                        Verify on Chain
+                    </button>
+                </div>
+            </div>
+
+            <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
                 <h2 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Personal Documents</h2>
                 <input
                     type="file"
@@ -157,6 +216,7 @@ const DigitalIDScreen: React.FC<DigitalIDScreenProps> = ({ currentUser }) => {
             </div>
             
             {viewingDocument && <DocumentViewerModal document={viewingDocument} onClose={() => setViewingDocument(null)} />}
+            {isVerifying && verificationStatus && <BlockchainVerificationModal status={verificationStatus} onClose={() => setIsVerifying(false)} />}
         </div>
     )
 };

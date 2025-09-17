@@ -1,6 +1,6 @@
 
 
-export type AdminPage = 'Dashboard' | 'Incident Management' | 'Incident Response' | 'Reports' | 'User & Roles' | 'Settings';
+export type AdminPage = 'Dashboard' | 'Incident Management' | 'Incident Response' | 'Reports' | 'User & Roles' | 'Settings' | 'Profile';
 
 // FIX: Added TouristScreen type export
 export type TouristScreen = 'Home' | 'Itinerary' | 'Alerts' | 'Map' | 'AI Actions' | 'Digital ID' | 'File E-FIR' | 'Settings' | 'Feedback' | 'Profile' | 'Terms';

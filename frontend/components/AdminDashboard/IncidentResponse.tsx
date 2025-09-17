@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import Card from '../shared/Card';
 import MapView from '../shared/MapView';
@@ -66,7 +67,7 @@ const OfficerItem: React.FC<{ officer: Officer; onAssign: () => void; }> = ({ of
 };
 
 const IncidentResponse: React.FC = () => {
-    const [alerts] = useState<ActiveAlert[]>(MOCK_ACTIVE_ALERTS);
+    const [alerts, setAlerts] = useState<ActiveAlert[]>(MOCK_ACTIVE_ALERTS);
     const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
     const [selectedAlertId, setSelectedAlertId] = useState<number | null>(alerts.length > 0 ? alerts[0].id : null);
     const [assignments, setAssignments] = useState<Record<number, number>>({ 3: 2 }); // { alertId: officerId }
@@ -76,15 +77,29 @@ const IncidentResponse: React.FC = () => {
     const handleAssign = (officerId: number) => {
         if (!selectedAlertId) return;
         setAssignments(prev => ({ ...prev, [selectedAlertId]: officerId }));
-        setOfficers(prev => prev.map(o => o.id === officerId ? { ...o, status: 'On Route' } : o));
+        setOfficers(prev => prev.map(o => o.id === officerId ? { ...o, status: 'Busy' } : o));
+        setAlerts(prev => prev.map(a => a.id === selectedAlertId ? { ...a, status: 'Assigned' } : a));
     };
 
     const handleUnassign = (officerId: number) => {
         if (!selectedAlertId || assignments[selectedAlertId] !== officerId) return;
-        const newAssignments = { ...assignments };
-        delete newAssignments[selectedAlertId];
-        setAssignments(newAssignments);
+        
+        // Use functional updates to ensure state consistency
+        setAssignments(prev => {
+            const newAssignments = { ...prev };
+            delete newAssignments[selectedAlertId];
+            return newAssignments;
+        });
+
         setOfficers(prev => prev.map(o => o.id === officerId ? { ...o, status: 'Available' } : o));
+        
+        setAlerts(prev => prev.map(a => {
+            if (a.id === selectedAlertId) {
+                const { status, ...rest } = a;
+                return rest;
+            }
+            return a;
+        }));
     };
 
     const assignedOfficer = useMemo(() => {
@@ -92,7 +107,7 @@ const IncidentResponse: React.FC = () => {
         return officers.find(o => o.id === assignments[selectedAlertId]);
     }, [selectedAlertId, assignments, officers]);
 
-    const availableOfficers = officers.filter(o => o.status === 'Available' && !Object.values(assignments).includes(o.id));
+    const availableOfficers = officers.filter(o => o.status === 'Available');
 
     const mapPins = alerts.map(alert => {
         const mockCoords: { [key: number]: { x: number, y: number } } = {
@@ -168,9 +183,9 @@ const IncidentResponse: React.FC = () => {
                             <div>
                                 <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400">Available Officers</h3>
                                 <div className="mt-1 space-y-1 max-h-40 overflow-y-auto">
-                                    {availableOfficers.length > 0 ? availableOfficers.map(officer => (
+                                    {availableOfficers.length > 0 && !assignedOfficer ? availableOfficers.map(officer => (
                                         <OfficerItem key={officer.id} officer={officer} onAssign={() => handleAssign(officer.id)} />
-                                    )) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">No officers available.</p>}
+                                    )) : <p className="text-sm text-gray-500 dark:text-gray-400 p-2">{assignedOfficer ? 'Officer already assigned.' : 'No officers available.'}</p>}
                                 </div>
                             </div>
                              <div className="flex space-x-2 pt-4 border-t border-light-200 dark:border-dark-700">
