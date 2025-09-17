@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect, FormEvent } from 'react';
+import React, { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
 import Card from '../shared/Card';
 import { SearchIcon, ThreeDotsIcon } from '../../constants';
 import { MOCK_DETAILED_INCIDENTS } from '../../constants';
@@ -7,54 +7,93 @@ import { DetailedIncident } from '../../types';
 import MapView from '../shared/MapView';
 
 // --- MODAL COMPONENTS --- //
-const NewIncidentModal: React.FC<{ isOpen: boolean; onClose: () => void; onAddIncident: (incident: DetailedIncident) => void; }> = ({ isOpen, onClose, onAddIncident }) => {
+const IncidentFormModal: React.FC<{
+    isOpen: boolean;
+    onClose: () => void;
+    onSave: (incident: DetailedIncident) => void;
+    incidentToEdit: DetailedIncident | null;
+}> = ({ isOpen, onClose, onSave, incidentToEdit }) => {
     if (!isOpen) return null;
+
+    const isEditing = !!incidentToEdit;
+    const [formData, setFormData] = useState({
+        type: incidentToEdit?.type || '',
+        tourist: incidentToEdit?.tourist || '',
+        location: incidentToEdit?.location || '',
+        priority: incidentToEdit?.priority || 'Medium',
+        status: incidentToEdit?.status || 'Unassigned',
+    });
+
+    useEffect(() => {
+        if (incidentToEdit) {
+            setFormData({
+                type: incidentToEdit.type,
+                tourist: incidentToEdit.tourist,
+                location: incidentToEdit.location,
+                priority: incidentToEdit.priority,
+                status: incidentToEdit.status,
+            });
+        } else {
+            // Reset for new incident
+            setFormData({ type: '', tourist: '', location: '', priority: 'Medium', status: 'Unassigned' });
+        }
+    }, [incidentToEdit, isOpen]);
+
+    const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const formData = new FormData(e.currentTarget);
-        const newIncident: DetailedIncident = {
-            id: `GN-2024-${Math.floor(Math.random() * 9000) + 1000}`,
-            time: 'Just now',
-            type: formData.get('type') as string,
-            tourist: formData.get('tourist') as string,
-            location: formData.get('location') as string,
-            priority: formData.get('priority') as DetailedIncident['priority'],
-            status: 'Unassigned',
+        const savedIncident: DetailedIncident = {
+            id: incidentToEdit?.id || `GN-2024-${Math.floor(Math.random() * 9000) + 1000}`,
+            time: incidentToEdit?.time || 'Just now',
+            ...formData,
+            priority: formData.priority as DetailedIncident['priority'],
+            status: formData.status as DetailedIncident['status'],
         };
-        onAddIncident(newIncident);
-        onClose();
+        onSave(savedIncident);
     };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-light-100 dark:bg-dark-800 rounded-xl shadow-2xl p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
-                <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">New Incident Report</h2>
+                <h2 className="text-xl font-bold mb-4 text-gray-800 dark:text-gray-100">{isEditing ? 'Edit Incident Report' : 'New Incident Report'}</h2>
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
                         <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Tourist Name</label>
-                        <input name="tourist" type="text" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
+                        <input name="tourist" type="text" value={formData.tourist} onChange={handleChange} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
                     </div>
                      <div>
                         <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Incident Type</label>
-                        <input name="type" type="text" placeholder="e.g., Medical" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
+                        <input name="type" type="text" value={formData.type} onChange={handleChange} placeholder="e.g., Medical" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
                     </div>
                      <div>
                         <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Location</label>
-                        <input name="location" type="text" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
+                        <input name="location" type="text" value={formData.location} onChange={handleChange} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
                     </div>
                      <div>
                         <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Priority</label>
-                        <select name="priority" defaultValue="Medium" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
+                        <select name="priority" value={formData.priority} onChange={handleChange} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
                             <option>Low</option>
                             <option>Medium</option>
                             <option>High</option>
                             <option>Critical</option>
                         </select>
                     </div>
+                     <div>
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Status</label>
+                        <select name="status" value={formData.status} onChange={handleChange} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
+                           <option>Unassigned</option>
+                           <option>Assigned</option>
+                           <option>Investigating</option>
+                           <option>Resolved</option>
+                        </select>
+                    </div>
                     <div className="flex justify-end space-x-3 pt-4">
                         <button type="button" onClick={onClose} className="bg-light-200 dark:bg-dark-700 px-4 py-2 rounded-lg font-semibold hover:bg-light-300 dark:hover:bg-dark-600">Cancel</button>
-                        <button type="submit" className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700">Add Incident</button>
+                        <button type="submit" className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700">{isEditing ? 'Save Changes' : 'Add Incident'}</button>
                     </div>
                 </form>
             </div>
@@ -123,8 +162,7 @@ const StatCard: React.FC<{ title: string; value: number; color: string; }> = ({ 
     </Card>
 );
 
-const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; }> = ({ incident, onViewDetails }) => {
-    // Action menu state and ref for closing on outside click
+const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const menuRef = useRef<HTMLDivElement>(null);
     useEffect(() => {
@@ -152,6 +190,7 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
                     {isMenuOpen && (
                         <div className="absolute right-0 mt-2 w-36 bg-light-100 dark:bg-dark-800 rounded-md shadow-lg border border-light-200 dark:border-dark-700 z-10">
                             <button onClick={() => { onViewDetails(); setIsMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700">View Details</button>
+                            <button onClick={() => { onEdit(); setIsMenuOpen(false); }} className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700">Edit</button>
                             <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-light-200 dark:hover:bg-dark-700">Assign Officer</button>
                         </div>
                     )}
@@ -161,7 +200,7 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
     );
 };
 
-const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; }> = ({ incident, onViewDetails }) => (
+const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => (
     <Card className="!p-0 mb-4 overflow-hidden">
         <div className="p-4">
             <div className="flex justify-between items-start mb-2">
@@ -176,7 +215,8 @@ const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => 
                 <span className="text-gray-400">{incident.time}</span>
             </div>
         </div>
-        <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end">
+        <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end space-x-4">
+            <button onClick={onEdit} className="text-sm font-semibold text-primary-600 dark:text-primary-400">Edit</button>
             <button onClick={onViewDetails} className="text-sm font-semibold text-primary-600 dark:text-primary-400">View Details</button>
         </div>
     </Card>
@@ -185,11 +225,23 @@ const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => 
 // --- MAIN COMPONENT --- //
 const IncidentManagement: React.FC = () => {
     const [incidents, setIncidents] = useState<DetailedIncident[]>(MOCK_DETAILED_INCIDENTS);
-    const [isNewIncidentModalOpen, setIsNewIncidentModalOpen] = useState(false);
-    const [selectedIncident, setSelectedIncident] = useState<DetailedIncident | null>(null);
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [incidentToEdit, setIncidentToEdit] = useState<DetailedIncident | null>(null);
+    const [selectedIncidentForDetails, setSelectedIncidentForDetails] = useState<DetailedIncident | null>(null);
+    
+    const handleOpenFormModal = (incident: DetailedIncident | null) => {
+        setIncidentToEdit(incident);
+        setIsFormModalOpen(true);
+    };
 
-    const handleAddIncident = (incident: DetailedIncident) => {
-        setIncidents(prev => [incident, ...prev]);
+    const handleSaveIncident = (incidentToSave: DetailedIncident) => {
+        if (incidentToEdit) { // Editing existing
+            setIncidents(incidents.map(inc => inc.id === incidentToSave.id ? incidentToSave : inc));
+        } else { // Adding new
+            setIncidents(prev => [incidentToSave, ...prev]);
+        }
+        setIsFormModalOpen(false);
+        setIncidentToEdit(null);
     };
 
     return (
@@ -199,7 +251,7 @@ const IncidentManagement: React.FC = () => {
                     <SearchIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                     <input type="text" placeholder="Search by ID, Tourist, Location..." className="w-full sm:w-80 bg-light-100 dark:bg-dark-800 border border-light-300 dark:border-dark-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
                 </div>
-                <button onClick={() => setIsNewIncidentModalOpen(true)} className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-sm">
+                <button onClick={() => handleOpenFormModal(null)} className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-sm">
                     + New Incident Report
                 </button>
             </div>
@@ -216,7 +268,12 @@ const IncidentManagement: React.FC = () => {
                 {/* Mobile Card View */}
                 <div className="md:hidden">
                     {incidents.map(incident => (
-                        <IncidentCard key={incident.id} incident={incident} onViewDetails={() => setSelectedIncident(incident)} />
+                        <IncidentCard 
+                            key={incident.id} 
+                            incident={incident} 
+                            onViewDetails={() => setSelectedIncidentForDetails(incident)}
+                            onEdit={() => handleOpenFormModal(incident)}
+                        />
                     ))}
                 </div>
 
@@ -238,7 +295,14 @@ const IncidentManagement: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-light-200 dark:divide-dark-700">
-                                    {incidents.map(incident => <IncidentRow key={incident.id} incident={incident} onViewDetails={() => setSelectedIncident(incident)} />)}
+                                    {incidents.map(incident => 
+                                        <IncidentRow 
+                                            key={incident.id} 
+                                            incident={incident} 
+                                            onViewDetails={() => setSelectedIncidentForDetails(incident)}
+                                            onEdit={() => handleOpenFormModal(incident)}
+                                        />
+                                    )}
                                 </tbody>
                             </table>
                         </div>
@@ -246,14 +310,15 @@ const IncidentManagement: React.FC = () => {
                 </div>
             </div>
 
-            <NewIncidentModal 
-                isOpen={isNewIncidentModalOpen} 
-                onClose={() => setIsNewIncidentModalOpen(false)}
-                onAddIncident={handleAddIncident}
+            <IncidentFormModal 
+                isOpen={isFormModalOpen} 
+                onClose={() => setIsFormModalOpen(false)}
+                onSave={handleSaveIncident}
+                incidentToEdit={incidentToEdit}
             />
             <IncidentDetailsModal
-                incident={selectedIncident}
-                onClose={() => setSelectedIncident(null)}
+                incident={selectedIncidentForDetails}
+                onClose={() => setSelectedIncidentForDetails(null)}
             />
         </div>
     );
