@@ -117,7 +117,7 @@ const IncidentResponse: React.FC = () => {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
             <div className="lg:col-span-2">
-                <Card className="h-[calc(100vh-8rem)] flex flex-col">
+                <Card className="h-[50vh] lg:h-[calc(100vh-8rem)] flex flex-col">
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Interactive Incident Map</h2>
                     <div className="flex-grow bg-light-200 dark:bg-dark-700 rounded-lg">
                         <MapView
