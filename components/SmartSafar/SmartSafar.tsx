@@ -39,7 +39,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
           setIsTracking(true);
         },
         (error) => {
-          console.error("Geolocation error:", error);
+          console.error("Geolocation error", error);
           setIsTracking(false);
         },
         {
