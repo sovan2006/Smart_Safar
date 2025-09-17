@@ -1,4 +1,7 @@
-
+export enum ViewMode {
+  Admin = 'admin',
+  Tourist = 'tourist',
+}
 
 export type AdminPage = 'Dashboard' | 'Incident Management' | 'Incident Response' | 'Reports' | 'User & Roles' | 'Settings' | 'Profile';
 
@@ -24,6 +27,11 @@ export interface Tourist {
   dateOfBirth?: string;
   fatherName?: string;
   motherName?: string;
+  location?: {
+    lat: number;
+    lng: number;
+    timestamp: number;
+  };
 }
 
 export interface DetailedIncident {
@@ -36,6 +44,15 @@ export interface DetailedIncident {
     status: 'Unassigned' | 'Assigned' | 'Investigating' | 'Resolved';
     lat?: number;
     lng?: number;
+}
+
+
+export interface Alert {
+    id: number;
+    title: string;
+    description: string;
+    time: string;
+    type: 'alert' | 'info' | 'warning';
 }
 
 export interface Officer {
@@ -53,12 +70,6 @@ export interface ActiveAlert {
   location: string;
   time: string;
   status?: 'Assigned';
-}
-
-export interface Alert {
-    id: number;
-    title: string;
-    description: string;
-    time: string;
-    type: 'alert' | 'info' | 'warning';
+  lat?: number;
+  lng?: number;
 }

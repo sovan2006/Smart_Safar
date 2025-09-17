@@ -66,6 +66,9 @@ const RegisterScreen: React.FC<RegisterScreenProps> = ({ onNavigateToLogin, onRe
           <button type="submit" className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors hover:bg-primary-700">
             Register
           </button>
+          <p className="text-xs text-center text-gray-500 dark:text-gray-400">
+            ✓ Your identity will be secured on the SmartSafar private blockchain.
+          </p>
         </form>
 
         <div className="text-center text-sm text-gray-600 dark:text-gray-400">

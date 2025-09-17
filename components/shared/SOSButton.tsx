@@ -83,7 +83,7 @@ const SOSButton: React.FC = () => {
                 onMouseUp={handleMouseUp}
                 onTouchStart={handleMouseDown}
                 onTouchEnd={handleMouseUp}
-                className="fixed bottom-6 right-6 w-20 h-20 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[100] animate-pulse"
+                className="fixed bottom-6 right-6 w-20 h-20 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[100]"
                 aria-label="Emergency SOS"
             >
                 <div className="relative w-full h-full flex items-center justify-center">

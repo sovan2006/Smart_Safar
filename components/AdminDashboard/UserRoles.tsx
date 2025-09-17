@@ -1,4 +1,3 @@
-
 import React, { useState, FormEvent, useEffect } from 'react';
 import Card from '../shared/Card';
 import { MOCK_USERS } from '../../constants';
@@ -57,8 +56,7 @@ const UserFormModal: React.FC<{
                         <input value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} type="email" required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg" />
                     </div>
                      <div>
-                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Role</label>
-                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value as User['role']})} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
+                        <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Role</label>                        <select value={formData.role} onChange={e => setFormData({...formData, role: e.target.value as User['role']})} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
                             <option>Admin</option>
                             <option>Officer</option>
                             <option>Tourist Helper</option>
@@ -98,21 +96,60 @@ const UserRow: React.FC<{
     </div>
 );
 
-
-const PermissionItem: React.FC<{ label: string, checked?: boolean }> = ({ label, checked = true }) => (
+// --- PERMISSION ITEM COMPONENT --- //
+const PermissionItem: React.FC<{ 
+    label: string, 
+    isChecked: boolean,
+    onToggle: () => void
+}> = ({ label, isChecked, onToggle }) => (
     <div className="flex items-center space-x-3 p-3">
-        <input type="checkbox" defaultChecked={checked} className="form-checkbox h-4 w-4 text-primary-600 rounded focus:ring-primary-500 bg-light-200 dark:bg-dark-800 border-light-300 dark:border-dark-600" />
+        <input 
+            type="checkbox" 
+            checked={isChecked}
+            onChange={onToggle}
+            className="form-checkbox h-4 w-4 text-primary-600 rounded focus:ring-primary-500 bg-light-200 dark:bg-dark-800 border-light-300 dark:border-dark-600" 
+        />
         <p className="text-gray-700 dark:text-gray-300">{label}</p>
     </div>
 );
 
+// --- PERMISSIONS STATE --- //
+interface AdminPermissions {
+    viewHeatMap: boolean;
+    accessDigitalId: boolean;
+    generateEfir: boolean;
+    sendGeoFenceAlerts: boolean;
+    manageUsers: boolean;
+    accessFullReports: boolean;
+}
 
+const initialPermissions: AdminPermissions = {
+    viewHeatMap: true,
+    accessDigitalId: true,
+    generateEfir: true,
+    sendGeoFenceAlerts: true,
+    manageUsers: true,
+    accessFullReports: false,
+};
+
+
+// --- MAIN COMPONENT --- //
 const UserRoles: React.FC = () => {
     const [users, setUsers] = useState<User[]>(MOCK_USERS);
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | null>(null);
+    const [permissions, setPermissions] = useState<AdminPermissions>(initialPermissions);
     
+    const handlePermissionToggle = (key: keyof AdminPermissions) => {
+        setPermissions(prev => ({...prev, [key]: !prev[key]}));
+    };
+    
+    const handleSaveChanges = () => {
+        console.log("Saving permissions:", permissions);
+        alert('Permissions have been saved successfully!');
+    };
+
     const handleOpenModal = (user: User | null) => {
         setEditingUser(user);
         setIsModalOpen(true);
@@ -130,10 +167,6 @@ const UserRoles: React.FC = () => {
 
     const handleToggleStatus = (userId: number) => {
         setUsers(users.map(u => u.id === userId ? { ...u, status: u.status === 'Active' ? 'Inactive' : 'Active' } : u));
-    };
-
-    const handleSaveChanges = () => {
-        alert('Permissions have been saved successfully!');
     };
 
     const filteredUsers = users.filter(user =>
@@ -184,12 +217,12 @@ const UserRoles: React.FC = () => {
                         <button onClick={handleSaveChanges} className="bg-primary-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-primary-700">Save Changes</button>
                     </div>
                     <div className="bg-light-200/50 dark:bg-dark-700/50 p-4 rounded-lg divide-y divide-light-300 dark:divide-dark-600">
-                        <PermissionItem label="View Tourist Heat Map" />
-                        <PermissionItem label="Access Digital ID Records" />
-                        <PermissionItem label="Generate E-FIR" />
-                        <PermissionItem label="Send Geo-Fence Alerts" />
-                        <PermissionItem label="Manage User Accounts" />
-                        <PermissionItem label="Access Full Reports" checked={false} />
+                        <PermissionItem label="View Tourist Heat Map" isChecked={permissions.viewHeatMap} onToggle={() => handlePermissionToggle('viewHeatMap')} />
+                        <PermissionItem label="Access Digital ID Records" isChecked={permissions.accessDigitalId} onToggle={() => handlePermissionToggle('accessDigitalId')} />
+                        <PermissionItem label="Generate E-FIR" isChecked={permissions.generateEfir} onToggle={() => handlePermissionToggle('generateEfir')} />
+                        <PermissionItem label="Send Geo-Fence Alerts" isChecked={permissions.sendGeoFenceAlerts} onToggle={() => handlePermissionToggle('sendGeoFenceAlerts')} />
+                        <PermissionItem label="Manage User Accounts" isChecked={permissions.manageUsers} onToggle={() => handlePermissionToggle('manageUsers')} />
+                        <PermissionItem label="Access Full Reports" isChecked={permissions.accessFullReports} onToggle={() => handlePermissionToggle('accessFullReports')} />
                     </div>
                 </Card>
             </div>

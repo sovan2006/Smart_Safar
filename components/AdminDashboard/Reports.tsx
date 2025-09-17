@@ -15,11 +15,15 @@ const Reports: React.FC = () => {
             <div style={{ width: '100%', height: 300 }}>
               <ResponsiveContainer>
                 <BarChart data={REPORT_CHART_DATA}>
-                  <XAxis dataKey="name" stroke="#9CA3AF" tick={{ fontSize: 12 }} />
-                  <YAxis stroke="#9CA3AF" tick={{ fontSize: 12 }} />
+                  <XAxis dataKey="name" stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400"/>
+                  <YAxis stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400" />
                   <Tooltip 
                     cursor={{fill: 'rgba(113, 113, 122, 0.1)'}}
-                    contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '0.5rem' }}
+                    contentStyle={{ 
+                      backgroundColor: 'var(--color-light-100, #ffffff)', 
+                      border: '1px solid var(--color-light-300, #e2e8f0)', 
+                      borderRadius: '0.5rem'
+                    }}
                     />
                   <Legend />
                   <Bar dataKey="Incidents" fill="#0ea5e9" name="Total Incidents" radius={[4, 4, 0, 0]} />
@@ -64,7 +68,7 @@ const Reports: React.FC = () => {
         <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Detailed Report Data</h2>
         <table className="w-full text-left">
           <thead>
-            <tr className="border-b border-light-200 dark:border-dark-700 bg-light-200 dark:bg-dark-700/50">
+            <tr className="border-b border-light-200 dark:border-dark-700 bg-light-200/50 dark:bg-dark-700/50">
               <th className="p-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Report ID</th>
               <th className="p-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Date</th>
               <th className="p-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Type</th>

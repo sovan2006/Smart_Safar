@@ -1,5 +1,3 @@
-
-
 import React, { useState, FormEvent, ChangeEvent } from 'react';
 import Card from '../shared/Card';
 import { ClockIcon, UsersIcon, SettingsIcon } from '../../constants';

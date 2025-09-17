@@ -1,6 +1,7 @@
 import React from 'react';
 
 interface MapPin {
+  id?: string | number;
   x: number;
   y: number;
   color: string;
@@ -10,9 +11,11 @@ interface MapPin {
 interface MapViewProps {
   pins?: MapPin[];
   className?: string;
+  onPinClick?: (id: string | number) => void;
+  selectedPinId?: string | number;
 }
 
-const MapView: React.FC<MapViewProps> = ({ pins = [], className = '' }) => {
+const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick, selectedPinId }) => {
   return (
     <div className={`w-full h-full bg-light-100 dark:bg-dark-800 rounded-lg overflow-hidden ${className}`}>
       <svg width="100%" height="100%" viewBox="0 0 300 180">
@@ -101,6 +104,17 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '' }) => {
           .dark .pin-label-text {
             fill: #ecf0f1;
           }
+          .selected-pin-glow {
+              animation: pulse 1.5s infinite ease-out;
+              stroke: var(--selected-glow-color, #f87171);
+              stroke-width: 2.5;
+              fill: none;
+          }
+          @keyframes pulse {
+              0% { transform: scale(0.9); opacity: 1; }
+              70% { transform: scale(3.5); opacity: 0; }
+              100% { transform: scale(0.9); opacity: 0; }
+          }
         `}</style>
 
         {/* Base layer */}
@@ -141,20 +155,30 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '' }) => {
         </g>
         
         {/* Pins */}
-        {pins.map((pin, index) => (
-          <g key={index} transform={`translate(${pin.x}, ${pin.y})`} className="map-pin">
-            <g filter="url(#drop-shadow)">
-               <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
-               <circle cx="0" cy="-15" r="4" fill="white" />
-            </g>
-            {pin.label && (
-              <g transform="translate(12, -18)">
-                <rect x="-3" y="-8" width={pin.label.length * 4.5 + 6} height="12" rx="3" className="pin-label-bg" strokeWidth="0.5" />
-                <text x="0" y="0" className="pin-label-text">{pin.label}</text>
+        {pins.map((pin, index) => {
+          const isSelected = pin.id !== undefined && pin.id === selectedPinId;
+          return (
+            <g 
+              key={pin.id || index}
+              transform={`translate(${pin.x}, ${pin.y})`}
+              className="map-pin"
+              style={{ transform: isSelected ? 'scale(1.4) translateY(-4px)' : 'scale(1)', zIndex: isSelected ? 10 : 1 } as React.CSSProperties}
+              onClick={() => pin.id && onPinClick?.(pin.id)}
+            >
+              {isSelected && <circle cx="0" cy="-15" r="8" className="selected-pin-glow" style={{'--selected-glow-color': pin.color} as React.CSSProperties} />}
+              <g filter="url(#drop-shadow)">
+                <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
+                <circle cx="0" cy="-15" r="4" fill="white" />
               </g>
-            )}
-          </g>
-        ))}
+              {pin.label && isSelected && (
+                <g transform="translate(12, -18)">
+                  <rect x="-3" y="-8" width={pin.label.length * 4.5 + 6} height="12" rx="3" className="pin-label-bg" strokeWidth="0.5" />
+                  <text x="0" y="0" className="pin-label-text">{pin.label}</text>
+                </g>
+              )}
+            </g>
+          )
+        })}
       </svg>
     </div>
   );

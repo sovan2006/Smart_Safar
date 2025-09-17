@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { SearchIcon, LogoutIcon, SettingsIcon, UsersIcon } from '../../constants';
 import DarkModeToggle from '../shared/DarkModeToggle';

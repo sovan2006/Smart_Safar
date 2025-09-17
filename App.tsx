@@ -96,6 +96,27 @@ const App: React.FC = () => {
     return false;
   };
 
+  const handleLocationUpdate = (location: { lat: number; lng: number }) => {
+    if (currentUser) {
+      const updatedUsers = users.map(user =>
+        user.email === currentUser.email
+          ? { ...user, location: { ...location, timestamp: Date.now() } }
+          : user
+      );
+      setUsers(updatedUsers);
+
+      setCurrentUser(prev => prev ? { ...prev, location: { ...location, timestamp: Date.now() } } : null);
+    }
+  };
+
+  const handleSwitchToTouristView = () => {
+    if (users.length > 0) {
+      setCurrentUser(users[0]); // Default to the first tourist for the demo
+      setView('Tourist');
+    } else {
+      alert("No tourist accounts are available to display.");
+    }
+  };
 
   const renderContent = () => {
     const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
@@ -111,9 +132,9 @@ const App: React.FC = () => {
       case 'Register':
         return <RegisterScreen onRegister={handleRegister} onNavigateToLogin={() => setView('Login')} />;
       case 'Admin':
-        return <AdminDashboard onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} />;
+        return <AdminDashboard tourists={users} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onSwitchToTouristView={handleSwitchToTouristView} />;
       case 'Tourist':
-        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
+        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
       default:
         return <LoginScreen {...loginProps} error={loginError} />;
     }

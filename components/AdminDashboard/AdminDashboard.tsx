@@ -1,5 +1,3 @@
-
-
 import React, { useState } from 'react';
 import Sidebar from './Sidebar';
 import Header from './Header';
@@ -10,26 +8,28 @@ import Reports from './Reports';
 import UserRoles from './UserRoles';
 import Settings from './Settings';
 import Profile from './Profile';
-import { AdminPage } from '../../types';
+import { AdminPage, Tourist } from '../../types';
 
 interface AdminDashboardProps {
   onLogout: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  tourists: Tourist[];
+  onSwitchToTouristView: () => void;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDarkMode, onToggleDarkMode }) => {
-  const [activePage, setActivePage] = useState<AdminPage>('Incident Management');
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDarkMode, onToggleDarkMode, tourists, onSwitchToTouristView }) => {
+  const [activePage, setActivePage] = useState<AdminPage>('Incident Response');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const renderContent = () => {
     switch (activePage) {
       case 'Dashboard':
-        return <Dashboard />;
+        return <Dashboard tourists={tourists} />;
       case 'Incident Management':
-        return <IncidentManagement />;
+        return <IncidentManagement tourists={tourists} />;
       case 'Incident Response':
-        return <IncidentResponse />;
+        return <IncidentResponse tourists={tourists} />;
       case 'Reports':
         return <Reports />;
       case 'User & Roles':
@@ -39,7 +39,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDarkMode, o
       case 'Profile':
         return <Profile />;
       default:
-        return <IncidentManagement />;
+        return <IncidentManagement tourists={tourists} />;
     }
   };
 
@@ -51,6 +51,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDarkMode, o
         onLogout={onLogout}
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
+        onSwitchToTouristView={onSwitchToTouristView}
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header 
