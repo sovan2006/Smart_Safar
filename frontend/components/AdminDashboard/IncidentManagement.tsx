@@ -1,9 +1,8 @@
-
 import React, { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
 import Card from '../shared/Card';
 import { SearchIcon, ThreeDotsIcon } from '../../constants';
 import { MOCK_DETAILED_INCIDENTS } from '../../constants';
-import { DetailedIncident } from '../../types';
+import { DetailedIncident, Tourist } from '../../types';
 import MapView from '../shared/MapView';
 
 // --- MODAL COMPONENTS --- //
@@ -222,8 +221,12 @@ const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => 
     </Card>
 );
 
+interface IncidentManagementProps {
+    tourists: Tourist[];
+}
+
 // --- MAIN COMPONENT --- //
-const IncidentManagement: React.FC = () => {
+const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => {
     const [incidents, setIncidents] = useState<DetailedIncident[]>(MOCK_DETAILED_INCIDENTS);
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [incidentToEdit, setIncidentToEdit] = useState<DetailedIncident | null>(null);

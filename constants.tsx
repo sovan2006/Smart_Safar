@@ -1,5 +1,5 @@
 import React from 'react';
-import { User, DetailedIncident, Alert, Officer, ActiveAlert } from './types';
+import { User, DetailedIncident, Alert, Officer, ActiveAlert, Tourist } from './types';
 
 // SVG Icons
 export const GuardianShieldIcon: React.FC<{className?: string}> = ({className}) => (
@@ -204,4 +204,31 @@ export const MOCK_TOURIST_ALERTS: Alert[] = [
     { id: 1, title: 'Weather Warning', description: 'Heavy rain expected in the afternoon. Plan accordingly.', time: '1h ago', type: 'alert' },
     { id: 2, title: 'Itinerary Update', description: 'Your visit to the museum has been confirmed for 2 PM.', time: '3h ago', type: 'info' },
     { id: 3, title: 'Road Closure', description: 'Main Street is closed for a local event until 6 PM.', time: '4h ago', type: 'warning' },
+];
+
+export const MOCK_TOURISTS_DATA: Tourist[] = [
+  { 
+    fullName: 'Tania T.', 
+    mobileNumber: '+1 123 456 7890', 
+    email: 'tourist@smartsafar.com', 
+    password: 'password123',
+    touristId: 'T-48291',
+    nationality: 'United States',
+    dateOfBirth: '1990-08-15',
+    fatherName: 'Ramesh T.',
+    motherName: 'Sunita T.',
+    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() }
+  },
+  { 
+    fullName: 'John Doe', 
+    mobileNumber: '+44 20 7946 0958', 
+    email: 'john.doe@example.com', 
+    password: 'password456',
+    touristId: 'T-12345',
+    nationality: 'British',
+    dateOfBirth: '1985-05-20',
+    fatherName: 'Richard Doe',
+    motherName: 'Jane Doe',
+    location: { lat: 28.6304, lng: 77.2177, timestamp: Date.now() }
+  }
 ];

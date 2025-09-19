@@ -27,27 +27,27 @@ const SOSModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 z-[110] flex items-center justify-center p-4" onClick={onClose}>
-            <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-dark-800 rounded-2xl shadow-xl p-6 w-full max-w-sm text-center" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold text-red-600 mb-2">EMERGENCY ALERT</h2>
-                <p className="text-gray-600 mb-4">Help is on the way. Your current location is:</p>
-                <p className="font-semibold bg-gray-100 p-2 rounded-lg mb-6">{location}</p>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">Help is on the way. Your current location is:</p>
+                <p className="font-semibold bg-gray-100 dark:bg-dark-700 p-2 rounded-lg mb-6">{location}</p>
 
                 <div className="space-y-3">
-                    <EmergencyButton onClick={() => window.location.href = 'tel:100'} className="bg-blue-100 text-blue-700">
+                    <EmergencyButton onClick={() => window.location.href = 'tel:100'} className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                         <span className="text-2xl">🚓</span>
                         <span>Call Police (100)</span>
                     </EmergencyButton>
-                     <EmergencyButton onClick={handleSmsAmbulance} className="bg-green-100 text-green-700">
+                     <EmergencyButton onClick={handleSmsAmbulance} className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300">
                         <span className="text-2xl">🚑</span>
                         <span>SMS Ambulance (102)</span>
                     </EmergencyButton>
-                     <EmergencyButton onClick={handleNotify} className="bg-orange-100 text-orange-700">
+                     <EmergencyButton onClick={handleNotify} className="bg-orange-100 text-orange-700 dark:bg-orange-500/20 dark:text-orange-300">
                         <span className="text-2xl">👥</span>
                         <span>Notify Emergency Contacts</span>
                     </EmergencyButton>
                 </div>
                 
-                <button onClick={onClose} className="mt-6 bg-gray-200 text-gray-800 font-bold py-3 px-6 rounded-lg w-full">
+                <button onClick={onClose} className="mt-6 bg-gray-200 dark:bg-dark-700 text-gray-800 dark:text-gray-200 font-bold py-3 px-6 rounded-lg w-full">
                     Cancel
                 </button>
             </div>
@@ -76,6 +76,15 @@ const SOSButton: React.FC = () => {
         }
     };
 
+    // Cleanup timeout on unmount
+    useEffect(() => {
+        return () => {
+            if (holdTimeout.current) {
+                clearTimeout(holdTimeout.current);
+            }
+        };
+    }, []);
+
     return (
         <>
             <button
@@ -83,8 +92,8 @@ const SOSButton: React.FC = () => {
                 onMouseUp={handleMouseUp}
                 onTouchStart={handleMouseDown}
                 onTouchEnd={handleMouseUp}
-                className="fixed bottom-6 right-6 w-20 h-20 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[100]"
-                aria-label="Emergency SOS"
+                className="fixed bottom-6 right-6 w-20 h-20 bg-red-600 text-white rounded-full shadow-2xl flex items-center justify-center z-[100] transform active:scale-95 transition-transform"
+                aria-label="Hold for Emergency SOS"
             >
                 <div className="relative w-full h-full flex items-center justify-center">
                     <span className="font-bold text-2xl z-10">SOS</span>

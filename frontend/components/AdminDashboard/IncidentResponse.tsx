@@ -1,9 +1,8 @@
-
 import React, { useState, useMemo } from 'react';
 import Card from '../shared/Card';
 import MapView from '../shared/MapView';
 import { MOCK_OFFICERS, MOCK_ACTIVE_ALERTS } from '../../constants';
-import { Officer, ActiveAlert } from '../../types';
+import { Officer, ActiveAlert, Tourist } from '../../types';
 
 const ActiveAlertItem: React.FC<{
     alert: ActiveAlert;
@@ -66,7 +65,11 @@ const OfficerItem: React.FC<{ officer: Officer; onAssign: () => void; }> = ({ of
     );
 };
 
-const IncidentResponse: React.FC = () => {
+interface IncidentResponseProps {
+    tourists: Tourist[];
+}
+
+const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
     const [alerts, setAlerts] = useState<ActiveAlert[]>(MOCK_ACTIVE_ALERTS);
     const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
     const [selectedAlertId, setSelectedAlertId] = useState<number | null>(alerts.length > 0 ? alerts[0].id : null);
@@ -84,7 +87,6 @@ const IncidentResponse: React.FC = () => {
     const handleUnassign = (officerId: number) => {
         if (!selectedAlertId || assignments[selectedAlertId] !== officerId) return;
         
-        // Use functional updates to ensure state consistency
         setAssignments(prev => {
             const newAssignments = { ...prev };
             delete newAssignments[selectedAlertId];
@@ -109,7 +111,22 @@ const IncidentResponse: React.FC = () => {
 
     const availableOfficers = officers.filter(o => o.status === 'Available');
 
-    const mapPins = alerts.map(alert => {
+    const mapCoords = (lat: number, lng: number) => {
+        const mapX = ((lng - 77.1) / 0.2) * 300;
+        const mapY = ((28.7 - lat) / 0.2) * 180;
+        return { x: Math.max(0, Math.min(300, mapX)), y: Math.max(0, Math.min(180, mapY)) };
+    };
+
+    const touristPins = tourists
+        .filter(t => t.location)
+        .map(tourist => ({
+            id: tourist.touristId!,
+            ...mapCoords(tourist.location!.lat, tourist.location!.lng),
+            color: '#22c55e', // green for active tourist
+            label: tourist.fullName,
+        }));
+
+    const alertPins = alerts.map(alert => {
         const mockCoords: { [key: number]: { x: number, y: number } } = {
             1: { x: 150, y: 50 },
             2: { x: 180, y: 130 },
@@ -128,6 +145,8 @@ const IncidentResponse: React.FC = () => {
             label: alert.user,
         };
     });
+    
+    const allPins = [...alertPins, ...touristPins];
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -136,7 +155,7 @@ const IncidentResponse: React.FC = () => {
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Interactive Incident Map</h2>
                     <div className="flex-grow bg-light-200 dark:bg-dark-700 rounded-lg">
                         <MapView
-                            pins={mapPins}
+                            pins={allPins}
                             selectedPinId={selectedAlertId}
                             onPinClick={(id) => setSelectedAlertId(id as number)}
                         />

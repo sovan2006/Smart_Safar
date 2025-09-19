@@ -1,9 +1,8 @@
-
 import React from 'react';
 import Card from '../shared/Card';
 import { MOCK_ACTIVE_ALERTS, REPORT_CHART_DATA } from '../../constants';
 import MapView from '../shared/MapView';
-import { ActiveAlert } from '../../types';
+import { ActiveAlert, Tourist } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const StatCard: React.FC<{ title: string; value: string; }> = ({ title, value }) => (
@@ -33,7 +32,26 @@ const AlertItem: React.FC<{ alert: ActiveAlert }> = ({ alert }) => {
     )
 }
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+    tourists: Tourist[];
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ tourists }) => {
+    const mapCoords = (lat: number, lng: number) => {
+        const mapX = ((lng - 77.1) / 0.2) * 300;
+        const mapY = ((28.7 - lat) / 0.2) * 180;
+        return { x: Math.max(0, Math.min(300, mapX)), y: Math.max(0, Math.min(180, mapY)) };
+    };
+
+    const touristPins = tourists
+        .filter(t => t.location)
+        .map(t => ({
+            id: t.touristId,
+            ...mapCoords(t.location!.lat, t.location!.lng),
+            color: 'rgba(255, 255, 0, 0.7)',
+            label: t.fullName
+        }));
+
   return (
     <div className="space-y-6">
        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -81,7 +99,7 @@ const Dashboard: React.FC = () => {
         <Card>
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Live Tourist Heatmap</h2>
             <div className="h-96">
-                <MapView pins={[{ x: 80, y: 50, color: 'red' }, { x: 120, y: 80, color: 'orange' }, { x: 95, y: 65, color: 'yellow' }]} />
+                <MapView pins={touristPins} />
             </div>
        </Card>
 

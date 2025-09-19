@@ -4,7 +4,7 @@ import { Tourist } from '../../types';
 
 interface RegisterScreenProps {
   onNavigateToLogin: () => void;
-  onRegister: (userData: Tourist) => void;
+  onRegister: (userData: Pick<Tourist, 'fullName' | 'mobileNumber' | 'email' | 'password'>) => void;
 }
 
 const RegisterScreen: React.FC<RegisterScreenProps> = ({ onNavigateToLogin, onRegister }) => {

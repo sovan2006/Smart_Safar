@@ -1,5 +1,3 @@
-
-
 export enum ViewMode {
   Admin = 'admin',
   Tourist = 'tourist',
@@ -29,6 +27,11 @@ export interface Tourist {
   dateOfBirth?: string;
   fatherName?: string;
   motherName?: string;
+  location?: {
+    lat: number;
+    lng: number;
+    timestamp: number;
+  };
 }
 
 export interface DetailedIncident {

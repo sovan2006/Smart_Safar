@@ -50,14 +50,13 @@ const Reports: React.FC = () => {
                             dataKey="value"
                             nameKey="name"
                             labelLine={false}
-                            // FIX: Explicitly type the label props with `any` to resolve TypeScript error with recharts' PieLabelRenderProps.
                             label={({ name, percent }: any) => `${name} ${(percent * 100).toFixed(0)}%`}
                         >
                             {REPORT_PIE_DATA.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                             ))}
                         </Pie>
-                         <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #e2e8f0', borderRadius: '0.5rem' }} />
+                         <Tooltip contentStyle={{ backgroundColor: 'var(--color-light-100, #ffffff)', border: '1px solid var(--color-light-300, #e2e8f0)', borderRadius: '0.5rem' }} />
                     </PieChart>
                 </ResponsiveContainer>
             </div>

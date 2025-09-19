@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { TouristScreen, Tourist } from '../../types';
 import MobileHeader from './MobileHeader';
 import MobileMenu from './MobileMenu';
@@ -21,12 +20,42 @@ interface SmartSafarProps {
   onLogout: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
+  onLocationUpdate: (location: { lat: number, lng: number }) => void;
 }
 
-const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMode, onToggleDarkMode }) => {
+const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMode, onToggleDarkMode, onLocationUpdate }) => {
   const [activeScreen, setActiveScreen] = useState<TouristScreen>('Home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
+  const [isTracking, setIsTracking] = useState(false);
+  const watchIdRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      watchIdRef.current = navigator.geolocation.watchPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          onLocationUpdate({ lat: latitude, lng: longitude });
+          setIsTracking(true);
+        },
+        (error) => {
+          console.error("Geolocation error", error);
+          setIsTracking(false);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        }
+      );
+    }
+
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+    };
+  }, [onLocationUpdate]);
 
   const t = (key: TranslationKey): string => {
     return translations[language][key] || translations.en[key];
@@ -64,6 +93,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
             setActiveScreen={setActiveScreen}
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
+            isTracking={isTracking}
             t={t}
         />
         {isMenuOpen && <MobileMenu 

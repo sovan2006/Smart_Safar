@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tourist } from '../../types';
 
 interface ForgotPasswordModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPasswordReset: (email: string, newPassword: string) => boolean;
+  onPasswordReset: (email: string, newPassword: string) => Promise<boolean>;
   users: Tourist[];
 }
 
@@ -67,7 +66,7 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
     setStep('reset');
   };
 
-  const handleResetPassword = () => {
+  const handleResetPassword = async () => {
     setError('');
     if (!newPassword || !confirmPassword) {
       setError('Please fill in both password fields.');
@@ -82,7 +81,10 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
       return;
     }
     
-    const success = onPasswordReset(email, newPassword);
+    setLoading(true);
+    const success = await onPasswordReset(email, newPassword);
+    setLoading(false);
+
     if(success) {
         setStep('success');
     } else {
@@ -125,8 +127,8 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Create a new password for your account.</p>
             <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New Password" className="w-full mt-1 p-3 border border-light-300 dark:border-dark-700 bg-light-200 dark:bg-dark-800 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"/>
             <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm New Password" className="w-full mt-4 p-3 border border-light-300 dark:border-dark-700 bg-light-200 dark:bg-dark-800 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"/>
-            <button onClick={handleResetPassword} className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors hover:bg-primary-700">
-              Reset Password
+            <button onClick={handleResetPassword} disabled={loading} className="w-full mt-4 bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors hover:bg-primary-700 disabled:bg-primary-400">
+              {loading ? 'Resetting...' : 'Reset Password'}
             </button>
           </>
         );

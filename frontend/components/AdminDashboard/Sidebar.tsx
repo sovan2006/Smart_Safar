@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { AdminPage } from '../../types';
 import { SmartSafarLogoIcon, DashboardIcon, IncidentIcon, ReportsIcon, UsersIcon, SettingsIcon, LogoutIcon, SwitchIcon } from '../../constants';
@@ -9,6 +8,7 @@ interface SidebarProps {
   onLogout: () => void;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
+  onSwitchToTouristView: () => void;
 }
 
 const NavItem: React.FC<{ icon: React.ReactNode; label: AdminPage; isActive: boolean; onClick: () => void; }> = ({ icon, label, isActive, onClick }) => (
@@ -28,7 +28,7 @@ const NavItem: React.FC<{ icon: React.ReactNode; label: AdminPage; isActive: boo
   </li>
 );
 
-const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, isOpen, setIsOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, isOpen, setIsOpen, onSwitchToTouristView }) => {
   const navItems: { label: AdminPage, icon: React.ReactNode }[] = [
     { label: 'Dashboard', icon: <DashboardIcon className="w-6 h-6" /> },
     { label: 'Incident Management', icon: <IncidentIcon className="w-6 h-6" /> },
@@ -78,6 +78,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activePage, setActivePage, onLogout, 
         </div>
         <div className="border-t border-light-300 dark:border-dark-700 pt-4 space-y-2">
            <button
+              onClick={onSwitchToTouristView}
               className="flex items-center space-x-3 p-3 rounded-lg cursor-pointer transition-colors w-full text-gray-500 dark:text-gray-400 hover:bg-light-200 dark:hover:bg-dark-700 hover:text-gray-800 dark:hover:text-gray-200"
             >
               <SwitchIcon className="w-6 h-6" />
