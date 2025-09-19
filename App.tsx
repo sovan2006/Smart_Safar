@@ -5,26 +5,15 @@ import LoginScreen from './components/auth/LoginScreen';
 import RegisterScreen from './components/auth/RegisterScreen';
 import SOSButton from './components/shared/SOSButton';
 import { Tourist } from './types';
+import { MOCK_TOURISTS } from './database';
 
 type AppView = 'Login' | 'Register' | 'Admin' | 'Tourist';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('Login');
   
-  // Mock "database" of registered users. Pre-populate with one user for testing.
-  const [users, setUsers] = useState<Tourist[]>([
-      { 
-        fullName: 'Tania T.', 
-        mobileNumber: '+1 123 456 7890', 
-        email: 'tourist@smartsafar.com', 
-        password: 'password123',
-        touristId: 'T-48291',
-        nationality: 'United States',
-        dateOfBirth: '1990-08-15',
-        fatherName: 'Ramesh T.',
-        motherName: 'Sunita T.'
-      }
-  ]);
+  // Mock "database" of registered users.
+  const [users, setUsers] = useState<Tourist[]>(MOCK_TOURISTS);
   const [currentUser, setCurrentUser] = useState<Tourist | null>(null);
   const [loginError, setLoginError] = useState('');
 
