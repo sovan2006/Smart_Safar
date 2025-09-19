@@ -8,15 +8,13 @@ import { Tourist } from './types';
 
 type AppView = 'Login' | 'Register' | 'Admin' | 'Tourist';
 
-const API_URL = '/api';
-
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('Login');
-  
   const [tourists, setTourists] = useState<Tourist[]>([]);
   const [currentUser, setCurrentUser] = useState<Tourist | null>(null);
   const [loginError, setLoginError] = useState('');
-  const [token, setToken] = useState<string|null>(localStorage.getItem('token'));
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
+  const [isAppLoading, setIsAppLoading] = useState(true);
 
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedMode = localStorage.getItem('darkMode');
@@ -31,104 +29,7 @@ const App: React.FC = () => {
     }
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
-
-  useEffect(() => {
-    // Fetch all tourist data on initial load for features like password reset
-    const fetchAllTourists = async () => {
-        try {
-            const res = await fetch(`${API_URL}/users/tourists`);
-            if (res.ok) {
-                const data = await res.json();
-                setTourists(data);
-            } else {
-                console.error("Failed to fetch initial tourist data: Server responded with status", res.status);
-            }
-        } catch (e) {
-            console.error("Failed to fetch initial tourist data:", e);
-        }
-    };
-    fetchAllTourists();
-  }, []);
-
-  useEffect(() => {
-    // This effect runs once on component mount to check if a user is already logged in.
-    const verifyUser = async () => {
-      if (token) {
-        try {
-          const response = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-            setView('Tourist'); // Or determine view based on user role
-          } else {
-            // Token is invalid or expired
-            handleLogout();
-          }
-        } catch (error) {
-          console.error('Verification failed', error);
-          handleLogout();
-        }
-      }
-    };
-    verifyUser();
-  }, [token]);
-
-  const handleLogin = async (credentials: {role: 'admin' | 'tourist', email?: string, password?: string}) => {
-    setLoginError('');
-    const { role, email, password } = credentials;
-
-    if (role === 'admin') {
-      if (email === 'admin@smartsafar.com' && password === 'admin123') {
-        // Admin login doesn't need to re-fetch tourists if already loaded
-        setView('Admin');
-      } else {
-        setLoginError('Invalid admin credentials.');
-      }
-    } else { // Tourist login
-      try {
-        const res = await fetch(`${API_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem('token', data.token);
-          setToken(data.token);
-          setCurrentUser(data);
-          setView('Tourist');
-        } else {
-          setLoginError(data.message || 'Invalid email or password.');
-        }
-      } catch (e) {
-         setLoginError('Failed to connect to the server.');
-      }
-    }
-  };
   
-  const handleRegister = async (newUserData: Pick<Tourist, 'fullName' | 'mobileNumber' | 'email' | 'password'>) => {
-    try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newUserData),
-        });
-        const data = await res.json();
-        if (res.ok) {
-            alert('Registration successful! Please log in.');
-            setView('Login');
-        } else {
-            alert(data.message || 'Registration failed.');
-        }
-    } catch(e) {
-        alert('Failed to connect to the server.');
-    }
-  };
-
   const handleLogout = () => {
     localStorage.removeItem('token');
     setToken(null);
@@ -136,51 +37,142 @@ const App: React.FC = () => {
     setLoginError('');
     setView('Login');
   };
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      setIsAppLoading(true);
+      setLoginError('');
+      
+      try {
+        const touristsResponse = await fetch('/api/users/tourists');
+        if (!touristsResponse.ok) {
+          throw new Error(`Failed to fetch initial tourist data: Server responded with status ${touristsResponse.status}`);
+        }
+        const touristsData: Tourist[] = await touristsResponse.json();
+        setTourists(touristsData);
+      } catch (error) {
+        console.error(error);
+        setLoginError(error instanceof Error ? error.message : 'Could not load required app data.');
+        setTourists([]);
+      }
+
+      const existingToken = localStorage.getItem('token');
+      if (existingToken) {
+        try {
+          const meResponse = await fetch('/api/auth/me', {
+            headers: { 'Authorization': `Bearer ${existingToken}` },
+          });
+
+          if (meResponse.ok) {
+            const user: Tourist = await meResponse.json();
+            setCurrentUser(user);
+            setView('Tourist');
+          } else {
+            handleLogout(); 
+          }
+        } catch (error) {
+          console.error("Session check failed:", error);
+          handleLogout();
+        }
+      }
+      setIsAppLoading(false);
+    };
+
+    initializeApp();
+  }, []);
+
+  const handleLogin = async (credentials: {role: 'admin' | 'tourist', email?: string, password?: string}) => {
+    setLoginError('');
+    const { role, email, password } = credentials;
+
+    if (role === 'admin') {
+      if (email === 'admin@smartsafar.com' && password === 'admin123') {
+        setView('Admin');
+      } else {
+        setLoginError('Invalid admin credentials.');
+      }
+    } else {
+      try {
+        const response = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.message || 'Login failed');
+        }
+        localStorage.setItem('token', data.token);
+        setToken(data.token);
+        setCurrentUser(data);
+        setView('Tourist');
+      } catch (error) {
+        setLoginError(error instanceof Error ? error.message : 'An unknown error occurred.');
+      }
+    }
+  };
+  
+  const handleRegister = async (newUserData: Pick<Tourist, 'fullName' | 'mobileNumber' | 'email' | 'password'>) => {
+    try {
+        const response = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newUserData),
+        });
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || 'Registration failed');
+        }
+        alert('Registration successful! Please log in.');
+        setView('Login');
+    } catch (error) {
+        alert(error instanceof Error ? error.message : 'An unknown error occurred during registration.');
+    }
+  };
   
   const handlePasswordReset = async (email: string, newPassword: string): Promise<boolean> => {
-     try {
-        const response = await fetch(`${API_URL}/auth/resetpassword`, {
+    setLoginError('');
+    try {
+        const response = await fetch('/api/auth/resetpassword', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, newPassword }),
         });
-        if (response.ok) return true;
         const data = await response.json();
-        setLoginError(data.message); // Show error on login screen
-        return false;
+        if (!response.ok) {
+            throw new Error(data.message || 'Password reset failed');
+        }
+        return true;
     } catch (error) {
-        console.error('Password reset failed', error);
-        setLoginError('Failed to connect to the server.');
+        setLoginError(error instanceof Error ? error.message : 'An unknown error occurred.');
         return false;
     }
   };
 
   const handleLocationUpdate = async (location: { lat: number; lng: number }) => {
     if (currentUser && token) {
-      // Optimistic UI update
       const updatedUser = { ...currentUser, location: { ...location, timestamp: Date.now() } };
       setCurrentUser(updatedUser);
       setTourists(prev => prev.map(t => t.email === currentUser.email ? updatedUser : t));
 
       try {
-          await fetch(`${API_URL}/users/location`, {
+          await fetch('/api/users/location', {
               method: 'PUT',
-              headers: {
+              headers: { 
                   'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
+                  'Authorization': `Bearer ${token}`
               },
-              body: JSON.stringify(location)
+              body: JSON.stringify(location),
           });
       } catch (error) {
-          console.error("Failed to update location on server", error);
-          // Optional: handle error, maybe revert optimistic update
+          console.error("Failed to update location on server:", error);
       }
     }
   };
 
   const handleSwitchToTouristView = () => {
     if (tourists.length > 0) {
-      setCurrentUser(tourists[0]); // Default to the first tourist for the demo
+      setCurrentUser(tourists[0]);
       setView('Tourist');
     } else {
       alert("No tourist accounts are available to display.");
@@ -192,7 +184,7 @@ const App: React.FC = () => {
     const loginProps = {
         onLogin: handleLogin,
         onNavigateToRegister: () => setView('Register'),
-        users: tourists, // Used for forgot password email check
+        users: tourists,
         onPasswordReset: handlePasswordReset
     };
     switch (view) {
@@ -213,6 +205,13 @@ const App: React.FC = () => {
     return 'bg-light-200 dark:bg-dark-900 text-gray-800 dark:text-gray-300';
   };
 
+  if (isAppLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-light-200 dark:bg-dark-900">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className={`font-sans ${getAppBg()} transition-colors duration-300`}>

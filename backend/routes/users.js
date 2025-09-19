@@ -12,6 +12,7 @@ router.get('/tourists', async (req, res) => {
         const tourists = await Tourist.find({}).select('-password');
         res.json(tourists);
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
@@ -33,6 +34,7 @@ router.put('/location', protect, async (req, res) => {
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 });

@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import AdminDashboard from './components/AdminDashboard/AdminDashboard';
+import GuardianTrails from './components/GuardianTrails/GuardianTrails';
 import SmartSafar from './components/SmartSafar/SmartSafar';
 import LoginScreen from './components/auth/LoginScreen';
 import RegisterScreen from './components/auth/RegisterScreen';
 import SOSButton from './components/shared/SOSButton';
 import { Tourist } from './types';
+import { MOCK_TOURISTS_DATA } from './constants';
 
 type AppView = 'Login' | 'Register' | 'Admin' | 'Tourist';
-
-const API_URL = '/api';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('Login');
@@ -33,49 +32,25 @@ const App: React.FC = () => {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Fetch all tourist data on initial load for features like password reset
-    const fetchAllTourists = async () => {
-        try {
-            const res = await fetch(`${API_URL}/users/tourists`);
-            if (res.ok) {
-                const data = await res.json();
-                setTourists(data);
-            } else {
-                console.error("Failed to fetch initial tourist data: Server responded with status", res.status);
-            }
-        } catch (e) {
-            console.error("Failed to fetch initial tourist data:", e);
-        }
-    };
-    fetchAllTourists();
+    // Load mock tourist data on initial load
+    setTourists(MOCK_TOURISTS_DATA);
   }, []);
 
   useEffect(() => {
-    // This effect runs once on component mount to check if a user is already logged in.
-    const verifyUser = async () => {
-      if (token) {
-        try {
-          const response = await fetch(`${API_URL}/auth/me`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          });
-          if (response.ok) {
-            const userData = await response.json();
-            setCurrentUser(userData);
-            setView('Tourist'); // Or determine view based on user role
-          } else {
-            // Token is invalid or expired
+    // This effect runs on component mount to check if a user is already logged in.
+    if (token && tourists.length > 0) {
+        // For mock purposes, if a token exists, we find the user by email stored in the token.
+        // A real token would be decoded and verified.
+        const loggedInEmail = localStorage.getItem('loggedInEmail');
+        const user = tourists.find(t => t.email === loggedInEmail);
+        if(user) {
+            setCurrentUser(user);
+            setView('Tourist');
+        } else {
             handleLogout();
-          }
-        } catch (error) {
-          console.error('Verification failed', error);
-          handleLogout();
         }
-      }
-    };
-    verifyUser();
-  }, [token]);
+    }
+  }, [token, tourists]);
 
   const handleLogin = async (credentials: {role: 'admin' | 'tourist', email?: string, password?: string}) => {
     setLoginError('');
@@ -83,98 +58,69 @@ const App: React.FC = () => {
 
     if (role === 'admin') {
       if (email === 'admin@smartsafar.com' && password === 'admin123') {
-        // Admin login doesn't need to re-fetch tourists if already loaded
         setView('Admin');
       } else {
         setLoginError('Invalid admin credentials.');
       }
     } else { // Tourist login
-      try {
-        const res = await fetch(`${API_URL}/auth/login`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await res.json();
-        if (res.ok) {
-          localStorage.setItem('token', data.token);
-          setToken(data.token);
-          setCurrentUser(data);
+      const user = tourists.find(t => t.email === email && t.password === password);
+      if (user) {
+          const mockToken = `mock-token-for-${user.email}`;
+          localStorage.setItem('token', mockToken);
+          localStorage.setItem('loggedInEmail', user.email);
+          setToken(mockToken);
+          setCurrentUser(user);
           setView('Tourist');
-        } else {
-          setLoginError(data.message || 'Invalid email or password.');
-        }
-      } catch (e) {
-         setLoginError('Failed to connect to the server.');
+      } else {
+          setLoginError('Invalid email or password.');
       }
     }
   };
   
-  const handleRegister = async (newUserData: Omit<Tourist, 'id'>) => {
-    try {
-        const res = await fetch(`${API_URL}/auth/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newUserData),
-        });
-        const data = await res.json();
-        if (res.ok) {
-            alert('Registration successful! Please log in.');
-            setView('Login');
-        } else {
-            alert(data.message || 'Registration failed.');
-        }
-    } catch(e) {
-        alert('Failed to connect to the server.');
+  const handleRegister = (newUserData: Omit<Tourist, 'id'>) => {
+    const userExists = tourists.some(t => t.email === newUserData.email);
+    if(userExists) {
+        alert('User with this email already exists.');
+        return;
     }
+
+    const newUser: Tourist = {
+        ...newUserData,
+        touristId: `T-${Math.floor(10000 + Math.random() * 90000)}`,
+    };
+    setTourists(prev => [...prev, newUser]);
+    alert('Registration successful! Please log in.');
+    setView('Login');
   };
 
   const handleLogout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('loggedInEmail');
     setToken(null);
     setCurrentUser(null);
     setLoginError('');
     setView('Login');
   };
   
-  const handlePasswordReset = async (email: string, newPassword: string): Promise<boolean> => {
-     try {
-        const response = await fetch(`${API_URL}/auth/resetpassword`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, newPassword }),
-        });
-        if (response.ok) return true;
-        const data = await response.json();
-        setLoginError(data.message); // Show error on login screen
-        return false;
-    } catch (error) {
-        console.error('Password reset failed', error);
-        setLoginError('Failed to connect to the server.');
-        return false;
+  const handlePasswordReset = (email: string, newPassword: string): Promise<boolean> => {
+    setLoginError('');
+    const userIndex = tourists.findIndex(u => u.email === email);
+    if (userIndex !== -1) {
+        const updatedTourists = [...tourists];
+        updatedTourists[userIndex].password = newPassword;
+        setTourists(updatedTourists);
+        return Promise.resolve(true);
     }
+    setLoginError('Could not find user with that email.');
+    return Promise.resolve(false);
   };
 
-  const handleLocationUpdate = async (location: { lat: number; lng: number }) => {
-    if (currentUser && token) {
+  const handleLocationUpdate = (location: { lat: number; lng: number }) => {
+    if (currentUser) {
       // Optimistic UI update
       const updatedUser = { ...currentUser, location: { ...location, timestamp: Date.now() } };
       setCurrentUser(updatedUser);
       setTourists(prev => prev.map(t => t.email === currentUser.email ? updatedUser : t));
-
-      try {
-          await fetch(`${API_URL}/users/location`, {
-              method: 'PUT',
-              headers: {
-                  'Content-Type': 'application/json',
-                  'Authorization': `Bearer ${token}`,
-              },
-              body: JSON.stringify(location)
-          });
-      } catch (error) {
-          console.error("Failed to update location on server", error);
-          // Optional: handle error, maybe revert optimistic update
-      }
     }
   };
 
@@ -201,7 +147,7 @@ const App: React.FC = () => {
       case 'Register':
         return <RegisterScreen onRegister={handleRegister} onNavigateToLogin={() => setView('Login')} />;
       case 'Admin':
-        return <AdminDashboard tourists={tourists} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onSwitchToTouristView={handleSwitchToTouristView} />;
+        return <GuardianTrails onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} />;
       case 'Tourist':
         return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
       default:

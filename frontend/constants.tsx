@@ -1,7 +1,5 @@
-
-
 import React from 'react';
-import { User, DetailedIncident, Alert, Officer, ActiveAlert } from './types';
+import { User, DetailedIncident, Alert, Officer, ActiveAlert, Tourist } from './types';
 
 // SVG Icons
 export const GuardianShieldIcon: React.FC<{className?: string}> = ({className}) => (
@@ -75,7 +73,6 @@ export const MoonIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
-{/* FIX: Add missing icons */}
 export const ShieldCheckIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path fillRule="evenodd" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-3zm-1.06 14.44L7.5 12.5l1.41-1.41L10.94 13l3.54-3.54L15.89 11l-4.95 4.95z" clipRule="evenodd"/>
@@ -141,7 +138,6 @@ export const ClockIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
-
 // Mock Data
 export const MOCK_USERS: User[] = [
     { id: 1, name: 'Admin User', email: 'admin@smartsafar.com', role: 'Admin', avatar: 'https://i.pravatar.cc/150?u=admin', status: 'Active' },
@@ -190,8 +186,49 @@ export const REPORT_PIE_DATA = [
   { name: 'Other', value: 10 },
 ];
 
+export const MOCK_ALERTS: Alert[] = [
+    { id: 1, title: 'GEO-FENCE BREACH', description: 'Tania T. entered a restricted zone.', time: '5m ago', type: 'alert' },
+    { id: 2, title: 'LOW BATTERY', description: 'John D.\'s device is at 15%.', time: '12m ago', type: 'info' },
+    { id: 3, title: 'ANOMALY DETECTED', description: 'Unusual activity from Priya S.', time: '30m ago', type: 'warning' },
+];
+
+export const MOCK_INCIDENTS = MOCK_DETAILED_INCIDENTS.map(incident => ({
+  id: incident.id,
+  time: incident.time,
+  name: incident.type, // Map 'type' to 'name'
+  tourist: incident.tourist,
+  status: incident.status,
+}));
+
 export const MOCK_TOURIST_ALERTS: Alert[] = [
     { id: 1, title: 'Weather Warning', description: 'Heavy rain expected in the afternoon. Plan accordingly.', time: '1h ago', type: 'alert' },
     { id: 2, title: 'Itinerary Update', description: 'Your visit to the museum has been confirmed for 2 PM.', time: '3h ago', type: 'info' },
     { id: 3, title: 'Road Closure', description: 'Main Street is closed for a local event until 6 PM.', time: '4h ago', type: 'warning' },
+];
+
+export const MOCK_TOURISTS_DATA: Tourist[] = [
+  { 
+    fullName: 'Tania T.', 
+    mobileNumber: '+1 123 456 7890', 
+    email: 'tourist@smartsafar.com', 
+    password: 'password123',
+    touristId: 'T-48291',
+    nationality: 'United States',
+    dateOfBirth: '1990-08-15',
+    fatherName: 'Ramesh T.',
+    motherName: 'Sunita T.',
+    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() }
+  },
+  { 
+    fullName: 'John Doe', 
+    mobileNumber: '+44 20 7946 0958', 
+    email: 'john.doe@example.com', 
+    password: 'password456',
+    touristId: 'T-12345',
+    nationality: 'British',
+    dateOfBirth: '1985-05-20',
+    fatherName: 'Richard Doe',
+    motherName: 'Jane Doe',
+    location: { lat: 28.6304, lng: 77.2177, timestamp: Date.now() }
+  }
 ];

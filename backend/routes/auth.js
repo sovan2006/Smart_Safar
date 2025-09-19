@@ -37,6 +37,7 @@ router.post('/register', async (req, res) => {
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
@@ -60,6 +61,7 @@ router.post('/login', async (req, res) => {
             res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
@@ -82,6 +84,7 @@ router.post('/resetpassword', async (req, res) => {
         await user.save();
         res.json({ message: 'Password reset successfully' });
     } catch (error) {
+        console.error(error);
         res.status(500).json({ message: 'Server Error' });
     }
 });
