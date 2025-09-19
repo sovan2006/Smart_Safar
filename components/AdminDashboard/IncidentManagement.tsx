@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, FormEvent, ChangeEvent } from 'react';
+import React, { useState, useRef, useEffect, FormEvent, ChangeEvent, useMemo } from 'react';
 import Card from '../shared/Card';
 import { SearchIcon, ThreeDotsIcon } from '../../constants';
 import { MOCK_DETAILED_INCIDENTS } from '../../constants';
@@ -134,13 +134,13 @@ const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClos
 }
 
 // --- RENDER HELPER FUNCTIONS & COMPONENTS --- //
-const getPriorityClasses = (priority: DetailedIncident['priority']) => {
+const getPriorityStyling = (priority: DetailedIncident['priority']) => {
     switch (priority) {
-        case 'Critical': return 'text-red-500';
-        case 'High': return 'text-orange-500';
-        case 'Medium': return 'text-yellow-500';
-        case 'Low': return 'text-blue-500';
-        default: return 'text-gray-500';
+        case 'Critical': return { border: 'border-red-500', text: 'text-red-600 dark:text-red-400' };
+        case 'High': return { border: 'border-orange-500', text: 'text-orange-600 dark:text-orange-400' };
+        case 'Medium': return { border: 'border-yellow-500', text: 'text-yellow-600 dark:text-yellow-400' };
+        case 'Low': return { border: 'border-blue-500', text: 'text-blue-600 dark:text-blue-400' };
+        default: return { border: 'border-transparent', text: 'text-gray-600 dark:text-gray-400' };
     }
 };
 
@@ -171,15 +171,17 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+    
+    const priorityClasses = getPriorityStyling(incident.priority);
 
     return (
-        <tr className="border-b border-light-200 dark:border-dark-700 last:border-0 hover:bg-light-200/50 dark:hover:bg-dark-700/50">
+        <tr className={`border-b border-light-200 dark:border-dark-700 last:border-0 hover:bg-light-200/50 dark:hover:bg-dark-700/50 border-l-4 ${priorityClasses.border}`}>
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.time}</td>
             <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{incident.id}</td>
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.type}</td>
             <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{incident.tourist}</td>
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.location}</td>
-            <td className={`px-4 py-3 font-bold ${getPriorityClasses(incident.priority)}`}>{incident.priority}</td>
+            <td className={`px-4 py-3 font-semibold ${priorityClasses.text}`}>{incident.priority}</td>
             <td className="px-4 py-3"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span></td>
             <td className="px-4 py-3 text-center">
                  <div className="relative" ref={menuRef}>
@@ -199,27 +201,30 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
     );
 };
 
-const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => (
-    <Card className="!p-0 mb-4 overflow-hidden">
-        <div className="p-4">
-            <div className="flex justify-between items-start mb-2">
-                <div>
-                    <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist} - {incident.location}</p>
+const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => {
+    const priorityClasses = getPriorityStyling(incident.priority);
+    return (
+        <Card className={`!p-0 mb-4 overflow-hidden border-l-4 ${priorityClasses.border}`}>
+            <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                    <div>
+                        <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist} - {incident.location}</p>
+                    </div>
+                    <span className={`text-sm font-bold ${priorityClasses.text}`}>{incident.priority}</span>
                 </div>
-                <span className={`text-sm font-bold ${getPriorityClasses(incident.priority)}`}>{incident.priority}</span>
+                <div className="flex justify-between items-center text-xs">
+                    <span className={`px-2 py-1 font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span>
+                    <span className="text-gray-400">{incident.time}</span>
+                </div>
             </div>
-            <div className="flex justify-between items-center text-xs">
-                <span className={`px-2 py-1 font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span>
-                <span className="text-gray-400">{incident.time}</span>
+            <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end space-x-4">
+                <button onClick={onEdit} className="text-sm font-semibold text-primary-600 dark:text-primary-400">Edit</button>
+                <button onClick={onViewDetails} className="text-sm font-semibold text-primary-600 dark:text-primary-400">View Details</button>
             </div>
-        </div>
-        <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end space-x-4">
-            <button onClick={onEdit} className="text-sm font-semibold text-primary-600 dark:text-primary-400">Edit</button>
-            <button onClick={onViewDetails} className="text-sm font-semibold text-primary-600 dark:text-primary-400">View Details</button>
-        </div>
-    </Card>
-);
+        </Card>
+    );
+};
 
 interface IncidentManagementProps {
     tourists: Tourist[];
@@ -228,9 +233,60 @@ interface IncidentManagementProps {
 // --- MAIN COMPONENT --- //
 const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => {
     const [incidents, setIncidents] = useState<DetailedIncident[]>(MOCK_DETAILED_INCIDENTS);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'All' | DetailedIncident['status']>('All');
+    const [priorityFilter, setPriorityFilter] = useState<'All' | DetailedIncident['priority']>('All');
+    const [sortConfig, setSortConfig] = useState<{ key: 'priority'; direction: 'ascending' | 'descending' } | null>(null);
+    
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [incidentToEdit, setIncidentToEdit] = useState<DetailedIncident | null>(null);
     const [selectedIncidentForDetails, setSelectedIncidentForDetails] = useState<DetailedIncident | null>(null);
+
+    const sortedAndFilteredIncidents = useMemo(() => {
+        let filteredIncidents = [...incidents];
+
+        if (searchQuery) {
+            filteredIncidents = filteredIncidents.filter(incident =>
+                incident.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                incident.tourist.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                incident.location.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        }
+
+        if (statusFilter !== 'All') {
+            filteredIncidents = filteredIncidents.filter(incident => incident.status === statusFilter);
+        }
+
+        if (priorityFilter !== 'All') {
+            filteredIncidents = filteredIncidents.filter(incident => incident.priority === priorityFilter);
+        }
+
+        if (sortConfig !== null) {
+            const priorityOrder: Record<DetailedIncident['priority'], number> = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
+            filteredIncidents.sort((a, b) => {
+                if (priorityOrder[a.priority] < priorityOrder[b.priority]) {
+                    return sortConfig.direction === 'ascending' ? -1 : 1;
+                }
+                if (priorityOrder[a.priority] > priorityOrder[b.priority]) {
+                    return sortConfig.direction === 'ascending' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
+        
+        return filteredIncidents;
+    }, [incidents, searchQuery, statusFilter, priorityFilter, sortConfig]);
+
+    const requestSort = (key: 'priority') => {
+        let direction: 'ascending' | 'descending' = 'ascending';
+        if (sortConfig && sortConfig.key === key && sortConfig.direction === 'ascending') {
+            direction = 'descending';
+        } else if (sortConfig && sortConfig.key === key && sortConfig.direction === 'descending') {
+            setSortConfig(null);
+            return;
+        }
+        setSortConfig({ key, direction });
+    };
     
     const handleOpenFormModal = (incident: DetailedIncident | null) => {
         setIncidentToEdit(incident);
@@ -249,12 +305,36 @@ const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => 
 
     return (
         <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
-                <div className="relative">
-                    <SearchIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                    <input type="text" placeholder="Search by ID, Tourist, Location..." className="w-full sm:w-80 bg-light-100 dark:bg-dark-800 border border-light-300 dark:border-dark-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+            <div className="flex flex-col md:flex-row justify-between md:items-center gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 flex-grow">
+                    <div className="relative flex-grow">
+                        <SearchIcon className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input type="text" placeholder="Search..." onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} className="w-full bg-light-100 dark:bg-dark-800 border border-light-300 dark:border-dark-700 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500" />
+                    </div>
+                    <select
+                        value={priorityFilter}
+                        onChange={(e) => setPriorityFilter(e.target.value as any)}
+                        className="bg-light-100 dark:bg-dark-800 border border-light-300 dark:border-dark-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                        <option value="All">All Priorities</option>
+                        <option value="Critical">Critical</option>
+                        <option value="High">High</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Low">Low</option>
+                    </select>
+                     <select
+                        value={statusFilter}
+                        onChange={(e) => setStatusFilter(e.target.value as any)}
+                        className="bg-light-100 dark:bg-dark-800 border border-light-300 dark:border-dark-700 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                        <option value="All">All Statuses</option>
+                        <option value="Unassigned">Unassigned</option>
+                        <option value="Assigned">Assigned</option>
+                        <option value="Investigating">Investigating</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
                 </div>
-                <button onClick={() => handleOpenFormModal(null)} className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-sm">
+                <button onClick={() => handleOpenFormModal(null)} className="bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-primary-700 transition-colors shadow-sm flex-shrink-0">
                     + New Incident Report
                 </button>
             </div>
@@ -270,7 +350,7 @@ const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => 
             <div>
                 {/* Mobile Card View */}
                 <div className="md:hidden">
-                    {incidents.map(incident => (
+                    {sortedAndFilteredIncidents.map(incident => (
                         <IncidentCard 
                             key={incident.id} 
                             incident={incident} 
@@ -292,13 +372,22 @@ const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => 
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Type</th>
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Tourist</th>
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Location</th>
-                                        <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Priority</th>
+                                        <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                            <button onClick={() => requestSort('priority')} className="flex items-center space-x-1 group">
+                                                <span className="group-hover:text-gray-800 dark:group-hover:text-gray-200">Priority</span>
+                                                {sortConfig?.key === 'priority' ? (
+                                                    <span>{sortConfig.direction === 'ascending' ? '▲' : '▼'}</span>
+                                                ) : (
+                                                    <span className="text-gray-400 opacity-0 group-hover:opacity-100">↕</span>
+                                                )}
+                                            </button>
+                                        </th>
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-light-200 dark:divide-dark-700">
-                                    {incidents.map(incident => 
+                                <tbody>
+                                    {sortedAndFilteredIncidents.map(incident => 
                                         <IncidentRow 
                                             key={incident.id} 
                                             incident={incident} 
