@@ -104,6 +104,41 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
         }));
     };
 
+    const handleResolve = () => {
+        if (!selectedAlertId) return;
+
+        // Find assigned officer and make them available again
+        const assignedOfficerId = assignments[selectedAlertId];
+        if (assignedOfficerId) {
+            setOfficers(prev =>
+                prev.map(o => o.id === assignedOfficerId ? { ...o, status: 'Available' } : o)
+            );
+        }
+
+        const currentIndex = alerts.findIndex(a => a.id === selectedAlertId);
+        const remainingAlerts = alerts.filter(a => a.id !== selectedAlertId);
+
+        // Remove the alert from the list of active alerts
+        setAlerts(remainingAlerts);
+
+        // Remove the assignment
+        setAssignments(prev => {
+            const newAssignments = { ...prev };
+            delete newAssignments[selectedAlertId];
+            return newAssignments;
+        });
+
+        // Smartly select the next alert
+        if (remainingAlerts.length > 0) {
+            // If the deleted item was the last in the list, select the new last item.
+            // Otherwise, select the item that took its place.
+            const newIndex = currentIndex >= remainingAlerts.length ? remainingAlerts.length - 1 : currentIndex;
+            setSelectedAlertId(remainingAlerts[newIndex].id);
+        } else {
+            setSelectedAlertId(null);
+        }
+    };
+
     const assignedOfficer = useMemo(() => {
         if (!selectedAlertId || !assignments[selectedAlertId]) return null;
         return officers.find(o => o.id === assignments[selectedAlertId]);
@@ -208,7 +243,7 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
                                 </div>
                             </div>
                              <div className="flex space-x-2 pt-4 border-t border-light-200 dark:border-dark-700">
-                                <button className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-primary-700">Resolve</button>
+                                <button onClick={handleResolve} className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-primary-700">Resolve</button>
                                 <button className="bg-light-200 dark:bg-dark-700 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-light-300 dark:hover:bg-dark-600">Add Log</button>
                             </div>
                         </div>
