@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { GoogleGenAI } from "@google/genai";
+import { Tourist } from '../../../types';
 
 const ActionGuideModal: React.FC<{ title: string; steps: string; isLoading: boolean; onClose: () => void }> = ({ title, steps, isLoading, onClose }) => {
     return (
@@ -25,8 +26,11 @@ const ActionGuideModal: React.FC<{ title: string; steps: string; isLoading: bool
     );
 };
 
+interface AIGuidedActionsScreenProps {
+    currentUser: Tourist;
+}
 
-const AIGuidedActionsScreen: React.FC = () => {
+const AIGuidedActionsScreen: React.FC<AIGuidedActionsScreenProps> = ({ currentUser }) => {
     const [tip, setTip] = useState("Click 'Get New Tip' for an AI-powered safety nudge.");
     const [loading, setLoading] = useState(false);
     const [selectedAction, setSelectedAction] = useState<string | null>(null);
@@ -38,10 +42,23 @@ const AIGuidedActionsScreen: React.FC = () => {
         setTip("🧠 Generating new tip...");
         try {
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+            let locationInfo = 'a tourist in a major city in India'; // Fallback
+            if (currentUser && currentUser.location) {
+                // A real app would reverse geocode. For this demo, we'll use lat/lng.
+                locationInfo = `a tourist currently at latitude ${currentUser.location.lat.toFixed(4)}, longitude ${currentUser.location.lng.toFixed(4)}`;
+            }
+
+            const prompt = `You are a travel safety expert. Generate a short, actionable, and highly relevant safety tip for ${locationInfo}. The tip must be a single sentence. Use your real-time knowledge of current events, weather, or specific risks for that precise area to make the tip timely and specific. For example, if there's a festival, mention crowd safety. If it's raining, mention slippery roads.`;
+            
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',
-                contents: 'Generate a short, actionable safety tip for a tourist visiting a new city. The tip should be a single sentence and easy to understand.',
+                contents: prompt,
+                config: {
+                    tools: [{ googleSearch: {} }],
+                },
             });
+
             setTip(response.text || "Could not generate a tip at this time. Please try again later.");
         } catch (error) {
             console.error("Error generating tip:", error);

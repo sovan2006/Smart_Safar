@@ -115,6 +115,12 @@ const App: React.FC = () => {
       // No server update needed; location is updated in the local state.
     }
   };
+  
+  const handleUpdateUser = (updatedUser: Tourist) => {
+    setCurrentUser(updatedUser);
+    setTourists(prev => prev.map(t => t.email === updatedUser.email ? updatedUser : t));
+    localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+  };
 
   const handleSwitchToTouristView = () => {
     if (tourists.length > 0) {
@@ -141,7 +147,7 @@ const App: React.FC = () => {
       case 'Admin':
         return <AdminDashboard tourists={tourists} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onSwitchToTouristView={handleSwitchToTouristView} />;
       case 'Tourist':
-        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
+        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} onUpdateUser={handleUpdateUser} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
       default:
         return <LoginScreen {...loginProps} error={loginError} />;
     }
@@ -162,7 +168,7 @@ const App: React.FC = () => {
   return (
     <div className={`font-sans ${getAppBg()} transition-colors duration-300`}>
       {renderContent()}
-      {view === 'Tourist' && <SOSButton />}
+      {view === 'Tourist' && <SOSButton currentUser={currentUser} />}
     </div>
   );
 };

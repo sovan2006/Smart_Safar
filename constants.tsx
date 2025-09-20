@@ -156,11 +156,11 @@ export const MOCK_DETAILED_INCIDENTS: DetailedIncident[] = [
 ];
 
 export const MOCK_OFFICERS: Officer[] = [
-    { id: 1, name: 'Officer Singh', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Available' },
-    { id: 2, name: 'Officer Gupta', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'On Route' },
-    { id: 3, name: 'Officer Sharma', avatar: 'https://i.pravatar.cc/150?u=officer3', status: 'Busy' },
-    { id: 4, name: 'Officer Kumar', avatar: 'https://i.pravatar.cc/150?u=officer4', status: 'Available' },
-    { id: 5, name: 'Officer Verma', avatar: 'https://i.pravatar.cc/150?u=officer5', status: 'Busy' },
+    { id: 1, name: 'Officer Singh', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Available', location: { lat: 28.62, lng: 77.22 } },
+    { id: 2, name: 'Officer Gupta', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'On Route', location: { lat: 27.55, lng: 93.0 } },
+    { id: 3, name: 'Officer Sharma', avatar: 'https://i.pravatar.cc/150?u=officer3', status: 'Busy', location: { lat: 27.59, lng: 91.86 } },
+    { id: 4, name: 'Officer Kumar', avatar: 'https://i.pravatar.cc/150?u=officer4', status: 'Available', location: { lat: 28.60, lng: 77.20 } },
+    { id: 5, name: 'Officer Verma', avatar: 'https://i.pravatar.cc/150?u=officer5', status: 'Busy', location: { lat: 27.6, lng: 92.0 } },
 ];
 
 export const MOCK_ACTIVE_ALERTS: ActiveAlert[] = [
@@ -217,7 +217,11 @@ export const MOCK_TOURISTS_DATA: Tourist[] = [
     dateOfBirth: '1990-08-15',
     fatherName: 'Ramesh T.',
     motherName: 'Sunita T.',
-    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() }
+    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() },
+    emergencyContacts: [
+      { id: 1, name: 'Ramesh T. (Father)', phone: '+11234567891' },
+      { id: 2, name: 'Sunita T. (Mother)', phone: '+11234567892' }
+    ]
   },
   { 
     fullName: 'John Doe', 

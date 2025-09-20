@@ -216,7 +216,8 @@ const App: React.FC = () => {
   return (
     <div className={`font-sans ${getAppBg()} transition-colors duration-300`}>
       {renderContent()}
-      {view === 'Tourist' && <SOSButton />}
+      {/* FIX: Pass currentUser prop to SOSButton to fix missing property error. */}
+      {view === 'Tourist' && <SOSButton currentUser={currentUser} />}
     </div>
   );
 };

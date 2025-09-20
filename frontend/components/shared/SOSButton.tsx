@@ -1,14 +1,26 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { Tourist } from '../../types';
 
-const SOSModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+interface SOSModalProps {
+    onClose: () => void;
+    currentUser: Tourist | null;
+}
+
+const SOSModal: React.FC<SOSModalProps> = ({ onClose, currentUser }) => {
     const [location, setLocation] = useState('Fetching location...');
 
     useEffect(() => {
-        // Mock location fetching
-        setTimeout(() => {
-            setLocation('Near India Gate, New Delhi, India');
-        }, 1000);
-    }, []);
+        if (currentUser?.location) {
+            // A real app would reverse-geocode this. For now, we'll use a mock address with real coords.
+            setLocation(`Near ${currentUser.location.lat.toFixed(4)}, ${currentUser.location.lng.toFixed(4)}`);
+        } else {
+            // Mock location fetching if user location not available
+             setTimeout(() => {
+                setLocation('Near India Gate, New Delhi, India');
+            }, 1000);
+        }
+    }, [currentUser]);
+
 
     const EmergencyButton: React.FC<{ children: React.ReactNode, className: string, onClick?: () => void }> = ({ children, className, onClick }) => (
         <button onClick={onClick} className={`w-full text-left p-4 rounded-lg font-semibold flex items-center space-x-4 ${className}`}>
@@ -17,12 +29,26 @@ const SOSModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
 
     const handleNotify = () => {
-        alert("Emergency contacts have been notified of your location.");
+        const contacts = currentUser?.emergencyContacts;
+        if (contacts && contacts.length > 0) {
+            const message = `Emergency! This is an automated SOS message from ${currentUser?.fullName}. My current location is: ${location}`;
+            const smsLink = `sms:${contacts.map(c => c.phone).join(',')}?body=${encodeURIComponent(message)}`;
+            window.location.href = smsLink;
+        } else {
+            alert("No emergency contacts found. Please add them in your profile.");
+        }
     };
 
     const handleSmsAmbulance = () => {
-        const message = encodeURIComponent(`Emergency! Ambulance needed at my current location: ${location}`);
-        window.location.href = `sms:102?body=${message}`;
+        const message = `Emergency! Ambulance needed at my current location: ${location}`;
+        const smsLink = `sms:102?body=${encodeURIComponent(message)}`;
+        window.location.href = smsLink;
+    };
+    
+    const handleSmsPolice = () => {
+        const message = `Emergency! Police needed at my current location: ${location}`;
+        const smsLink = `sms:100?body=${encodeURIComponent(message)}`;
+        window.location.href = smsLink;
     };
 
     return (
@@ -33,9 +59,9 @@ const SOSModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 <p className="font-semibold bg-gray-100 dark:bg-dark-700 p-2 rounded-lg mb-6">{location}</p>
 
                 <div className="space-y-3">
-                    <EmergencyButton onClick={() => window.location.href = 'tel:100'} className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
+                    <EmergencyButton onClick={handleSmsPolice} className="bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300">
                         <span className="text-2xl">🚓</span>
-                        <span>Call Police (100)</span>
+                        <span>SMS Police (100)</span>
                     </EmergencyButton>
                      <EmergencyButton onClick={handleSmsAmbulance} className="bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300">
                         <span className="text-2xl">🚑</span>
@@ -55,8 +81,11 @@ const SOSModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     );
 };
 
+interface SOSButtonProps {
+    currentUser: Tourist | null;
+}
 
-const SOSButton: React.FC = () => {
+const SOSButton: React.FC<SOSButtonProps> = ({ currentUser }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isHolding, setIsHolding] = useState(false);
     const holdTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -132,7 +161,7 @@ const SOSButton: React.FC = () => {
                     }
                 `}</style>
             </button>
-            {isModalOpen && <SOSModal onClose={() => setIsModalOpen(false)} />}
+            {isModalOpen && <SOSModal onClose={() => setIsModalOpen(false)} currentUser={currentUser} />}
         </>
     );
 };

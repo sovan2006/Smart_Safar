@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 
 interface MapPin {
@@ -15,13 +13,18 @@ interface MapViewProps {
   className?: string;
   onPinClick?: (id: string | number) => void;
   selectedPinId?: string | number;
+  alwaysShowLabels?: boolean;
+  showRoute?: boolean;
 }
 
-const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick, selectedPinId }) => {
+const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick, selectedPinId, alwaysShowLabels = false, showRoute = false }) => {
   return (
     <div className={`w-full h-full bg-light-100 dark:bg-dark-800 rounded-lg overflow-hidden ${className}`}>
       <svg width="100%" height="100%" viewBox="0 0 300 180">
         <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#0ea5e9" />
+          </marker>
           {/* Filters for texture and depth */}
           <filter id="drop-shadow" x="-50%" y="-50%" width="200%" height="200%">
             <feDropShadow dx="0.5" dy="1" stdDeviation="1" floodColor="#000" floodOpacity="0.2" />
@@ -145,6 +148,19 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
         <path d="M 250,40 V 150" strokeWidth="4" className="road-secondary-fill road-casing" fill="none"/>
         <path d="M 250,40 V 150" strokeWidth="3" className="road-secondary-fill" fill="none"/>
         
+        {/* Route Line */}
+        {showRoute && pins.length > 1 && (
+          <path
+            d={`M ${pins.map(p => `${p.x},${p.y}`).join(' L ')}`}
+            fill="none"
+            stroke="#0ea5e9"
+            strokeWidth="1.5"
+            strokeDasharray="4 4"
+            markerEnd="url(#arrowhead)"
+            style={{ filter: 'url(#drop-shadow)' }}
+          />
+        )}
+
         {/* Buildings */}
         <g className="building-block" strokeWidth="0.5">
           <rect x="10" y="10" width="30" height="25" rx="1" transform="rotate(5 25 22.5)" />
@@ -159,6 +175,7 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
         {/* Pins */}
         {pins.map((pin, index) => {
           const isSelected = pin.id !== undefined && pin.id === selectedPinId;
+          const showLabel = pin.label && (isSelected || alwaysShowLabels);
           return (
             <g 
               key={pin.id || index}
@@ -172,10 +189,10 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
                 <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
                 <circle cx="0" cy="-15" r="4" fill="white" />
               </g>
-              {pin.label && isSelected && (
-                <g transform="translate(12, -18)">
-                  <rect x="-3" y="-8" width={pin.label.length * 4.5 + 6} height="12" rx="3" className="pin-label-bg" strokeWidth="0.5" />
-                  <text x="0" y="0" className="pin-label-text">{pin.label}</text>
+              {showLabel && (
+                <g transform="translate(0, -28)">
+                  <rect x={-((pin.label.length * 4.5 + 6)/2)} y="-8" width={pin.label.length * 4.5 + 6} height="12" rx="3" className="pin-label-bg" strokeWidth="0.5" />
+                  <text x="0" y="0" className="pin-label-text" textAnchor="middle">{pin.label}</text>
                 </g>
               )}
             </g>

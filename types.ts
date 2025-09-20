@@ -17,6 +17,12 @@ export interface User {
   status: 'Active' | 'Inactive';
 }
 
+export interface EmergencyContact {
+    id: number;
+    name: string;
+    phone: string;
+}
+
 export interface Tourist {
   fullName: string;
   mobileNumber: string;
@@ -32,6 +38,7 @@ export interface Tourist {
     lng: number;
     timestamp: number;
   };
+  emergencyContacts?: EmergencyContact[];
 }
 
 export interface DetailedIncident {
@@ -60,6 +67,10 @@ export interface Officer {
   name: string;
   avatar: string;
   status: 'Available' | 'Busy' | 'On Route';
+  location?: {
+    lat: number;
+    lng: number;
+  };
 }
 
 export interface ActiveAlert {

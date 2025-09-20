@@ -21,9 +21,10 @@ interface SmartSafarProps {
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
   onLocationUpdate: (location: { lat: number, lng: number }) => void;
+  onUpdateUser: (updatedUser: Tourist) => void;
 }
 
-const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMode, onToggleDarkMode, onLocationUpdate }) => {
+const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMode, onToggleDarkMode, onLocationUpdate, onUpdateUser }) => {
   const [activeScreen, setActiveScreen] = useState<TouristScreen>('Home');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
@@ -73,12 +74,12 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
           case 'Itinerary': return <LiveItineraryScreen />;
           case 'Alerts': return <AlertsScreen />;
           case 'Map': return <SafeNavigationScreen />;
-          case 'AI Actions': return <AIGuidedActionsScreen />;
+          case 'AI Actions': return <AIGuidedActionsScreen currentUser={currentUser} />;
           case 'Digital ID': return <DigitalIDScreen currentUser={currentUser} />;
           case 'File E-FIR': return <FileEfirScreen />;
           case 'Settings': return <SettingsScreen onLogout={onLogout} />;
           case 'Feedback': return <FeedbackScreen />;
-          case 'Profile': return <ProfileScreen {...screenProps} />;
+          case 'Profile': return <ProfileScreen {...screenProps} onUpdateUser={onUpdateUser} />;
           case 'Terms': return <TermsScreen />;
           default: return <TouristHomeScreen {...screenProps} />;
       }

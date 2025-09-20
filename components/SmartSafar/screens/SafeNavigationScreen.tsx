@@ -4,6 +4,7 @@ import MapView from '../../shared/MapView';
 
 // A local interface for map pins since it's not exported from MapView
 interface MapPin {
+  id: string;
   x: number;
   y: number;
   color: string;
@@ -44,11 +45,11 @@ Return the analysis as a JSON object with the following structure:
 - "safetyScore": A safety score (e.g., "8/10").
 - "potentialRisks": An array of strings describing potential risks.
 - "recommendations": An array of strings with safety recommendations.
-- "safestTransport": A string for the safest mode of transport.
+- "safestTransport": A string for the safest mode of transport. If public transport is recommended, suggest specific options like "Delhi Metro Violet Line" or "Bus Route 534".
 - "waypoints": An array of objects for the safest route. Each object should have:
   - "name": The name of the waypoint (string).
-  - "x": An x-coordinate between 10 and 190 for map plotting (number).
-  - "y": A y-coordinate between 10 and 110 for map plotting (number).
+  - "x": An x-coordinate between 10 and 290 for map plotting (number).
+  - "y": A y-coordinate between 10 and 170 for map plotting (number).
 
 The waypoints array must start with the starting location and end with the destination. Include 1-3 key safe spots in between.`;
 
@@ -87,9 +88,10 @@ The waypoints array must start with the starting location and end with the desti
 
             if (result.waypoints && result.waypoints.length > 0) {
                 const pins: MapPin[] = result.waypoints.map((point: any, index: number) => ({
+                    id: `${point.name}-${index}`,
                     x: point.x,
                     y: point.y,
-                    color: index === 0 ? 'green' : index === result.waypoints.length - 1 ? 'red' : 'blue',
+                    color: index === 0 ? '#16a34a' : index === result.waypoints.length - 1 ? '#ef4444' : '#3b82f6',
                     label: point.name
                 }));
                 setMapPins(pins);
@@ -168,9 +170,9 @@ The waypoints array must start with the starting location and end with the desti
             )}
 
              <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
-                 <h2 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Live Map</h2>
+                 <h2 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Recommended Route</h2>
                  <div className="h-48 bg-gray-200 dark:bg-dark-700 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400">
-                    <MapView pins={mapPins} />
+                    <MapView pins={mapPins} alwaysShowLabels showRoute />
                  </div>
             </div>
         </div>

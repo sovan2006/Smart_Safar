@@ -73,7 +73,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
           case 'Itinerary': return <LiveItineraryScreen />;
           case 'Alerts': return <AlertsScreen />;
           case 'Map': return <SafeNavigationScreen />;
-          case 'AI Actions': return <AIGuidedActionsScreen />;
+          case 'AI Actions': return <AIGuidedActionsScreen currentUser={currentUser} />;
           case 'Digital ID': return <DigitalIDScreen currentUser={currentUser} />;
           case 'File E-FIR': return <FileEfirScreen />;
           case 'Settings': return <SettingsScreen onLogout={onLogout} />;

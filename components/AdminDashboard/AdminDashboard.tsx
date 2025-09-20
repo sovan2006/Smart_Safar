@@ -29,7 +29,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ onLogout, isDarkMode, o
       case 'Incident Management':
         return <IncidentManagement tourists={tourists} />;
       case 'Incident Response':
-        return <IncidentResponse tourists={tourists} />;
+        return <IncidentResponse />;
       case 'Reports':
         return <Reports />;
       case 'User & Roles':

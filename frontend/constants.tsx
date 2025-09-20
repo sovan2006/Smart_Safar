@@ -132,25 +132,30 @@ export const CheckCircleIcon: React.FC<{className?: string}> = ({className}) => 
     </svg>
 );
 
-export const PriorityHighIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 8l-6 6h12z"/>
-    </svg>
-);
-export const PriorityMediumIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4 11h16v2H4z" />
-    </svg>
-);
-export const PriorityLowIcon: React.FC<{className?: string}> = ({className}) => (
-    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 16l6-6H6z"/>
-    </svg>
-);
-
 export const ClockIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
+    </svg>
+);
+
+// FIX: Added missing PriorityHighIcon component.
+export const PriorityHighIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+    </svg>
+);
+
+// FIX: Added missing PriorityMediumIcon component.
+export const PriorityMediumIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M4 11h16v2H4z"/>
+    </svg>
+);
+
+// FIX: Added missing PriorityLowIcon component.
+export const PriorityLowIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/>
     </svg>
 );
 
@@ -172,11 +177,11 @@ export const MOCK_DETAILED_INCIDENTS: DetailedIncident[] = [
 ];
 
 export const MOCK_OFFICERS: Officer[] = [
-    { id: 1, name: 'Officer Singh', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Available' },
-    { id: 2, name: 'Officer Gupta', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'On Route' },
-    { id: 3, name: 'Officer Sharma', avatar: 'https://i.pravatar.cc/150?u=officer3', status: 'Busy' },
-    { id: 4, name: 'Officer Kumar', avatar: 'https://i.pravatar.cc/150?u=officer4', status: 'Available' },
-    { id: 5, name: 'Officer Verma', avatar: 'https://i.pravatar.cc/150?u=officer5', status: 'Busy' },
+    { id: 1, name: 'Officer Singh', avatar: 'https://i.pravatar.cc/150?u=officer1', status: 'Available', location: { lat: 28.62, lng: 77.22 } },
+    { id: 2, name: 'Officer Gupta', avatar: 'https://i.pravatar.cc/150?u=officer2', status: 'On Route', location: { lat: 27.55, lng: 93.0 } },
+    { id: 3, name: 'Officer Sharma', avatar: 'https://i.pravatar.cc/150?u=officer3', status: 'Busy', location: { lat: 27.59, lng: 91.86 } },
+    { id: 4, name: 'Officer Kumar', avatar: 'https://i.pravatar.cc/150?u=officer4', status: 'Available', location: { lat: 28.60, lng: 77.20 } },
+    { id: 5, name: 'Officer Verma', avatar: 'https://i.pravatar.cc/150?u=officer5', status: 'Busy', location: { lat: 27.6, lng: 92.0 } },
 ];
 
 export const MOCK_ACTIVE_ALERTS: ActiveAlert[] = [
@@ -233,7 +238,11 @@ export const MOCK_TOURISTS_DATA: Tourist[] = [
     dateOfBirth: '1990-08-15',
     fatherName: 'Ramesh T.',
     motherName: 'Sunita T.',
-    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() }
+    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() },
+    emergencyContacts: [
+      { id: 1, name: 'Ramesh T. (Father)', phone: '+11234567891' },
+      { id: 2, name: 'Sunita T. (Mother)', phone: '+11234567892' }
+    ]
   },
   { 
     fullName: 'John Doe', 

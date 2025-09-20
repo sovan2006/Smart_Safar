@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import Card from '../shared/Card';
 import MapView from '../shared/MapView';
 import { MOCK_OFFICERS, MOCK_ACTIVE_ALERTS } from '../../constants';
-import { Officer, ActiveAlert, Tourist } from '../../types';
+import { Officer, ActiveAlert } from '../../types';
 
 const ActiveAlertItem: React.FC<{
     alert: ActiveAlert;
@@ -65,11 +65,8 @@ const OfficerItem: React.FC<{ officer: Officer; onAssign: () => void; }> = ({ of
     );
 };
 
-interface IncidentResponseProps {
-    tourists: Tourist[];
-}
 
-const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
+const IncidentResponse: React.FC = () => {
     const [alerts, setAlerts] = useState<ActiveAlert[]>(MOCK_ACTIVE_ALERTS);
     const [officers, setOfficers] = useState<Officer[]>(MOCK_OFFICERS);
     const [selectedAlertId, setSelectedAlertId] = useState<number | null>(alerts.length > 0 ? alerts[0].id : null);
@@ -104,41 +101,6 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
         }));
     };
 
-    const handleResolve = () => {
-        if (!selectedAlertId) return;
-
-        // Find assigned officer and make them available again
-        const assignedOfficerId = assignments[selectedAlertId];
-        if (assignedOfficerId) {
-            setOfficers(prev =>
-                prev.map(o => o.id === assignedOfficerId ? { ...o, status: 'Available' } : o)
-            );
-        }
-
-        const currentIndex = alerts.findIndex(a => a.id === selectedAlertId);
-        const remainingAlerts = alerts.filter(a => a.id !== selectedAlertId);
-
-        // Remove the alert from the list of active alerts
-        setAlerts(remainingAlerts);
-
-        // Remove the assignment
-        setAssignments(prev => {
-            const newAssignments = { ...prev };
-            delete newAssignments[selectedAlertId];
-            return newAssignments;
-        });
-
-        // Smartly select the next alert
-        if (remainingAlerts.length > 0) {
-            // If the deleted item was the last in the list, select the new last item.
-            // Otherwise, select the item that took its place.
-            const newIndex = currentIndex >= remainingAlerts.length ? remainingAlerts.length - 1 : currentIndex;
-            setSelectedAlertId(remainingAlerts[newIndex].id);
-        } else {
-            setSelectedAlertId(null);
-        }
-    };
-
     const assignedOfficer = useMemo(() => {
         if (!selectedAlertId || !assignments[selectedAlertId]) return null;
         return officers.find(o => o.id === assignments[selectedAlertId]);
@@ -147,41 +109,50 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
     const availableOfficers = officers.filter(o => o.status === 'Available');
 
     const mapCoords = (lat: number, lng: number) => {
-        const mapX = ((lng - 77.1) / 0.2) * 300;
-        const mapY = ((28.7 - lat) / 0.2) * 180;
-        return { x: Math.max(0, Math.min(300, mapX)), y: Math.max(0, Math.min(180, mapY)) };
+        const minLng = 77.0, maxLng = 94.0;
+        const minLat = 27.5, maxLat = 28.8;
+        const mapWidth = 300, mapHeight = 180;
+        const padding = 15;
+        const x = ((lng - minLng) / (maxLng - minLng)) * (mapWidth - padding * 2) + padding;
+        const y = ((maxLat - lat) / (maxLat - minLat)) * (mapHeight - padding * 2) + padding;
+        return { x: x, y: y };
     };
-
-    const touristPins = tourists
-        .filter(t => t.location)
-        .map(tourist => ({
-            id: tourist.touristId!,
-            ...mapCoords(tourist.location!.lat, tourist.location!.lng),
-            color: '#22c55e', // green for active tourist
-            label: tourist.fullName,
-        }));
-
-    const alertPins = alerts.map(alert => {
-        const mockCoords: { [key: number]: { x: number, y: number } } = {
-            1: { x: 150, y: 50 },
-            2: { x: 180, y: 130 },
-            3: { x: 80, y: 90 }
-        };
-        let color = 'blue';
-        if (alert.priority === 'Critical') color = '#ef4444';
-        else if (alert.priority === 'High') color = '#f97316';
-        else if (alert.priority === 'Medium') color = '#eab308';
-
-        return {
-            id: alert.id,
-            x: mockCoords[alert.id]?.x || 50,
-            y: mockCoords[alert.id]?.y || 50,
-            color,
-            label: alert.user,
-        };
-    });
     
-    const allPins = [...alertPins, ...touristPins];
+    const allPins = useMemo(() => {
+        const alertCoordsFallback: { [key: number]: { lat: number, lng: number } } = {
+            1: { lat: 27.8, lng: 92.5 }, // Mago Cave (approx)
+            2: { lat: 27.5, lng: 92.1 }, // Sela Pass
+            3: { lat: 27.6, lng: 93.8 }, // Ziro Valley
+        };
+        
+        const alertPins = alerts.map(alert => {
+            const fallback = alertCoordsFallback[alert.id] || { lat: 28.61, lng: 77.23 };
+            const coords = mapCoords(fallback.lat, fallback.lng);
+            let color = '#3b82f6';
+            if (alert.priority === 'Critical') color = '#ef4444';
+            else if (alert.priority === 'High') color = '#f97316';
+
+            return {
+                id: alert.id,
+                x: coords.x,
+                y: coords.y,
+                color,
+                label: alert.user,
+            };
+        });
+
+        let officerPins = [];
+        if (assignedOfficer && assignedOfficer.location) {
+            officerPins.push({
+                id: `officer-${assignedOfficer.id}`,
+                ...mapCoords(assignedOfficer.location.lat, assignedOfficer.location.lng),
+                color: '#8b5cf6', // Purple for the officer
+                label: `Officer ${assignedOfficer.name.split(' ')[1]}`,
+            });
+        }
+        
+        return [...alertPins, ...officerPins];
+    }, [alerts, assignedOfficer]);
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
@@ -192,7 +163,11 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
                         <MapView
                             pins={allPins}
                             selectedPinId={selectedAlertId}
-                            onPinClick={(id) => setSelectedAlertId(id as number)}
+                            onPinClick={(id) => {
+                                if (typeof id === 'number') {
+                                    setSelectedAlertId(id);
+                                }
+                            }}
                         />
                     </div>
                 </Card>
@@ -243,7 +218,7 @@ const IncidentResponse: React.FC<IncidentResponseProps> = ({ tourists }) => {
                                 </div>
                             </div>
                              <div className="flex space-x-2 pt-4 border-t border-light-200 dark:border-dark-700">
-                                <button onClick={handleResolve} className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-primary-700">Resolve</button>
+                                <button className="flex-1 bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold text-sm hover:bg-primary-700">Resolve</button>
                                 <button className="bg-light-200 dark:bg-dark-700 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-light-300 dark:hover:bg-dark-600">Add Log</button>
                             </div>
                         </div>
