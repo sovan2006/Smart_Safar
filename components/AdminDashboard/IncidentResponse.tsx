@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Card from '../shared/Card';
 import MapView from '../shared/MapView';
 import { MOCK_OFFICERS, MOCK_ACTIVE_ALERTS } from '../../constants';
@@ -73,6 +73,34 @@ const IncidentResponse: React.FC = () => {
     const [assignments, setAssignments] = useState<Record<number, number>>({ 3: 2 }); // { alertId: officerId }
 
     const selectedAlert = useMemo(() => alerts.find(a => a.id === selectedAlertId), [alerts, selectedAlertId]);
+    const assignedOfficer = useMemo(() => {
+        if (!selectedAlertId || !assignments[selectedAlertId]) return null;
+        return officers.find(o => o.id === assignments[selectedAlertId]);
+    }, [selectedAlertId, assignments, officers]);
+
+    // Real-time tracking simulation
+    useEffect(() => {
+        if (!assignedOfficer || !assignedOfficer.location) {
+            return; // No officer to track
+        }
+
+        const intervalId = setInterval(() => {
+            setOfficers(currentOfficers =>
+                currentOfficers.map(officer => {
+                    if (officer.id === assignedOfficer.id && officer.location) {
+                        // Simulate movement
+                        const newLat = officer.location.lat + (Math.random() - 0.5) * 0.01;
+                        const newLng = officer.location.lng + (Math.random() - 0.5) * 0.01;
+                        return { ...officer, location: { lat: newLat, lng: newLng } };
+                    }
+                    return officer;
+                })
+            );
+        }, 2000); // Update every 2 seconds
+
+        return () => clearInterval(intervalId); // Cleanup on unmount or when officer changes
+    }, [assignedOfficer]);
+
 
     const handleAssign = (officerId: number) => {
         if (!selectedAlertId) return;
@@ -100,11 +128,6 @@ const IncidentResponse: React.FC = () => {
             return a;
         }));
     };
-
-    const assignedOfficer = useMemo(() => {
-        if (!selectedAlertId || !assignments[selectedAlertId]) return null;
-        return officers.find(o => o.id === assignments[selectedAlertId]);
-    }, [selectedAlertId, assignments, officers]);
 
     const availableOfficers = officers.filter(o => o.status === 'Available');
 
