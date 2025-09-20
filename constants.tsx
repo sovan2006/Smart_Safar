@@ -164,9 +164,9 @@ export const MOCK_OFFICERS: Officer[] = [
 ];
 
 export const MOCK_ACTIVE_ALERTS: ActiveAlert[] = [
-    { id: 1, priority: 'Critical', title: 'EMERGENCY: SOS SIGNAL', user: 'Jirya S.', location: 'Mago Cave', time: '3m ago' },
-    { id: 2, priority: 'High', title: 'GEO-FENCE BREACH', user: 'Tania T.', location: 'No signal last 30 min (Route)', time: '4m ago' },
-    { id: 3, priority: 'Medium', title: 'ANOMALY: SERCB-UP', user: 'John Doe', location: 'No signal last 90 min (Route)', time: '1h ago', status: 'Assigned' },
+    { id: 1, priority: 'Critical', title: 'EMERGENCY: SOS SIGNAL', user: 'Jirya S.', location: 'Mago Cave', time: '3m ago', lat: 27.8, lng: 92.5 },
+    { id: 2, priority: 'High', title: 'GEO-FENCE BREACH', user: 'Tania T.', location: 'Sela Pass', time: '4m ago', lat: 27.5, lng: 92.1 },
+    { id: 3, priority: 'Medium', title: 'ANOMALY: SERCB-UP', user: 'John Doe', location: 'Ziro Valley', time: '1h ago', status: 'Assigned', lat: 27.6, lng: 93.8 },
 ];
 
 export const REPORT_CHART_DATA = [

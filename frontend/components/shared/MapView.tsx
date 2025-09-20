@@ -101,7 +101,7 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
             stroke: rgba(127, 140, 141, 0.7);
           }
           .pin-label-text {
-            font-size: 8px;
+            font-size: 9px;
             font-family: 'Inter', sans-serif;
             font-weight: 600;
             fill: #2c3e50;
@@ -154,8 +154,8 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
             d={`M ${pins.map(p => `${p.x},${p.y}`).join(' L ')}`}
             fill="none"
             stroke="#0ea5e9"
-            strokeWidth="1.5"
-            strokeDasharray="4 4"
+            strokeWidth="2"
+            strokeDasharray="5 3"
             markerEnd="url(#arrowhead)"
             style={{ filter: 'url(#drop-shadow)' }}
           />
@@ -191,8 +191,8 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
               </g>
               {showLabel && (
                 <g transform="translate(0, -28)">
-                  <rect x={-((pin.label.length * 4.5 + 6)/2)} y="-8" width={pin.label.length * 4.5 + 6} height="12" rx="3" className="pin-label-bg" strokeWidth="0.5" />
-                  <text x="0" y="0" className="pin-label-text" textAnchor="middle">{pin.label}</text>
+                  <rect x={-((pin.label.length * 5 + 8)/2)} y="-9" width={pin.label.length * 5 + 8} height="13" rx="3" className="pin-label-bg" strokeWidth="0.5" />
+                  <text x="0" y="0.5" className="pin-label-text" textAnchor="middle">{pin.label}</text>
                 </g>
               )}
             </g>

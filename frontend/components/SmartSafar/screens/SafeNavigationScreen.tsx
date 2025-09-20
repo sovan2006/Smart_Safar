@@ -45,7 +45,7 @@ Return the analysis as a JSON object with the following structure:
 - "safetyScore": A safety score (e.g., "8/10").
 - "potentialRisks": An array of strings describing potential risks.
 - "recommendations": An array of strings with safety recommendations.
-- "safestTransport": A string for the safest mode of transport. If public transport is recommended, suggest specific options like "Delhi Metro Violet Line" or "Bus Route 534".
+- "safestTransport": A string for the safest mode of transport. Be specific. If public transport is recommended, you MUST suggest a concrete route, for example: 'Delhi Metro Violet Line towards Kashmere Gate' or 'Bus Route 534A from India Gate stop'.
 - "waypoints": An array of objects for the safest route. Each object should have:
   - "name": The name of the waypoint (string).
   - "x": An x-coordinate between 10 and 290 for map plotting (number).

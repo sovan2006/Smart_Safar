@@ -109,8 +109,8 @@ const IncidentResponse: React.FC = () => {
     const availableOfficers = officers.filter(o => o.status === 'Available');
 
     const mapCoords = (lat: number, lng: number) => {
-        const minLng = 77.0, maxLng = 94.0;
-        const minLat = 27.5, maxLat = 28.8;
+        const minLng = 91.5, maxLng = 94.0;
+        const minLat = 27.4, maxLat = 28.0;
         const mapWidth = 300, mapHeight = 180;
         const padding = 15;
         const x = ((lng - minLng) / (maxLng - minLng)) * (mapWidth - padding * 2) + padding;
@@ -119,15 +119,8 @@ const IncidentResponse: React.FC = () => {
     };
     
     const allPins = useMemo(() => {
-        const alertCoordsFallback: { [key: number]: { lat: number, lng: number } } = {
-            1: { lat: 27.8, lng: 92.5 }, // Mago Cave (approx)
-            2: { lat: 27.5, lng: 92.1 }, // Sela Pass
-            3: { lat: 27.6, lng: 93.8 }, // Ziro Valley
-        };
-        
-        const alertPins = alerts.map(alert => {
-            const fallback = alertCoordsFallback[alert.id] || { lat: 28.61, lng: 77.23 };
-            const coords = mapCoords(fallback.lat, fallback.lng);
+        const alertPins = alerts.filter(a => a.lat && a.lng).map(alert => {
+            const coords = mapCoords(alert.lat!, alert.lng!);
             let color = '#3b82f6';
             if (alert.priority === 'Critical') color = '#ef4444';
             else if (alert.priority === 'High') color = '#f97316';
