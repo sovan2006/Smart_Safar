@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 
 interface MapPin {
   id?: string | number;
@@ -18,6 +18,16 @@ interface MapViewProps {
 }
 
 const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick, selectedPinId, alwaysShowLabels = false, showRoute = false }) => {
+  // Sort pins to bring the selected one to the front for correct z-index rendering
+  const sortedPins = useMemo(() => {
+    if (!selectedPinId) return pins;
+    return [...pins].sort((a, b) => {
+        if (a.id === selectedPinId) return 1;
+        if (b.id === selectedPinId) return -1;
+        return 0;
+    });
+  }, [pins, selectedPinId]);
+
   return (
     <div className={`w-full h-full bg-light-100 dark:bg-dark-800 rounded-lg overflow-hidden ${className}`}>
       <svg width="100%" height="100%" viewBox="0 0 300 180">
@@ -87,9 +97,12 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
 
           .map-pin {
             cursor: pointer;
+            outline: none;
+          }
+          .map-pin .pin-content {
             transition: transform 0.2s ease-in-out;
           }
-          .map-pin:hover {
+          .map-pin:hover .pin-content, .map-pin:focus .pin-content {
             transform: scale(1.3) translateY(-3px);
           }
           .pin-label-bg {
@@ -173,28 +186,44 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
         </g>
         
         {/* Pins */}
-        {pins.map((pin, index) => {
+        {sortedPins.map((pin, index) => {
           const isSelected = pin.id !== undefined && pin.id === selectedPinId;
           const showLabel = pin.label && (isSelected || alwaysShowLabels);
+          
+          const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
+              if (e.type === 'click' || (e.type === 'keydown' && (e as React.KeyboardEvent).key === 'Enter')) {
+                  e.preventDefault();
+                  if (pin.id && onPinClick) {
+                      onPinClick(pin.id);
+                  }
+              }
+          };
+
           return (
-            <g 
+            // FIX: Replaced <a> with <g> for SVG compatibility and added accessibility attributes.
+            <g
               key={pin.id || index}
-              transform={`translate(${pin.x}, ${pin.y})`}
+              onClick={handleInteraction}
+              onKeyDown={handleInteraction}
+              aria-label={`Map pin for ${pin.label || `pin at ${pin.x}, ${pin.y}`}`}
               className="map-pin"
-              style={{ transform: isSelected ? 'scale(1.4) translateY(-4px)' : 'scale(1)', zIndex: isSelected ? 10 : 1 } as React.CSSProperties}
-              onClick={() => pin.id && onPinClick?.(pin.id)}
+              transform={`translate(${pin.x}, ${pin.y})`}
+              role="button"
+              tabIndex={0}
             >
-              {isSelected && <circle cx="0" cy="-15" r="8" className="selected-pin-glow" style={{'--selected-glow-color': pin.color} as React.CSSProperties} />}
-              <g filter="url(#drop-shadow)">
-                <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
-                <circle cx="0" cy="-15" r="4" fill="white" />
-              </g>
-              {showLabel && (
-                <g transform="translate(0, -28)">
-                  <rect x={-((pin.label.length * 5 + 8)/2)} y="-9" width={pin.label.length * 5 + 8} height="13" rx="3" className="pin-label-bg" strokeWidth="0.5" />
-                  <text x="0" y="0.5" className="pin-label-text" textAnchor="middle">{pin.label}</text>
+              <g className="pin-content" style={{ transform: isSelected ? 'scale(1.4) translateY(-4px)' : 'scale(1)'} as React.CSSProperties}>
+                {isSelected && <circle cx="0" cy="-15" r="8" className="selected-pin-glow" style={{'--selected-glow-color': pin.color} as React.CSSProperties} />}
+                <g filter="url(#drop-shadow)">
+                  <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
+                  <circle cx="0" cy="-15" r="4" fill="white" />
                 </g>
-              )}
+                {showLabel && (
+                  <g transform="translate(0, -28)">
+                    <rect x={-((pin.label!.length * 5 + 8)/2)} y="-9" width={pin.label!.length * 5 + 8} height="13" rx="3" className="pin-label-bg" strokeWidth="0.5" />
+                    <text x="0" y="0.5" className="pin-label-text" textAnchor="middle">{pin.label}</text>
+                  </g>
+                )}
+              </g>
             </g>
           )
         })}
