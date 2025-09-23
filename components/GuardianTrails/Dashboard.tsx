@@ -1,80 +1,154 @@
-
-
 import React from 'react';
 import Card from '../shared/Card';
-import { MOCK_ALERTS } from '../../constants';
+import { MOCK_ACTIVE_ALERTS, MOCK_DETAILED_INCIDENTS, REPORT_CHART_DATA } from '../../constants';
 import MapView from '../shared/MapView';
+import { ActiveAlert, DetailedIncident, Tourist } from '../../types';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const StatCard: React.FC<{ value: string; label: string; }> = ({ value, label }) => (
-    <div className="text-center">
-        <p className="text-4xl font-bold text-primary-400">{value}</p>
-        <p className="text-sm text-gray-400">{label}</p>
-    </div>
+const StatCard: React.FC<{ title: string; value: string; }> = ({ title, value }) => (
+    <Card>
+        <h3 className="text-gray-500 dark:text-gray-400 font-medium">{title}</h3>
+        <p className="text-3xl font-bold text-gray-800 dark:text-gray-200">{value}</p>
+    </Card>
 );
 
-const AlertItem: React.FC<{ alert: typeof MOCK_ALERTS[0] }> = ({ alert }) => (
-    <div className="p-3 bg-dark-900 rounded-md">
-        <div className="flex justify-between items-start">
-            <div>
-                <p className="font-semibold text-orange-400 flex items-center">
-                    <span className="w-5 h-5 mr-2">⚠️</span> {alert.title}
-                </p>
-                <p className="text-sm text-gray-400">{alert.description}</p>
+const AlertItem: React.FC<{ alert: ActiveAlert }> = ({ alert }) => {
+    const getPriorityClasses = () => {
+        switch (alert.priority) {
+            case 'Critical': return 'border-l-4 border-red-500 bg-red-50 dark:bg-red-500/10';
+            case 'High': return 'border-l-4 border-orange-500 bg-orange-50 dark:bg-orange-500/10';
+            case 'Medium': return 'border-l-4 border-yellow-500 bg-yellow-50 dark:bg-yellow-500/10';
+        }
+    }
+    return (
+        <div className={`p-3 rounded-r-lg ${getPriorityClasses()}`}>
+            <p className="font-semibold text-sm text-gray-800 dark:text-gray-200">{alert.title}</p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">{alert.user} @ {alert.location}</p>
+            <div className="flex justify-between items-end mt-1">
+                <p className="text-xs text-gray-400 dark:text-gray-500">{alert.time}</p>
+                {alert.status && <span className="text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-500/20 dark:text-blue-300 px-2 py-0.5 rounded-full">{alert.status}</span>}
             </div>
-            <p className="text-xs text-gray-500 flex-shrink-0 ml-2">{alert.time}</p>
         </div>
-        <div className="mt-2">
-            <button className="text-xs bg-dark-700 px-3 py-1 rounded hover:bg-dark-700/50 transition-colors">View Details</button>
+    )
+}
+
+const TaskItem: React.FC<{ incident: DetailedIncident }> = ({ incident }) => {
+    const priorityStyles: Record<DetailedIncident['priority'], string> = {
+        'Critical': 'border-red-500 bg-red-50 dark:bg-red-500/10',
+        'High': 'border-orange-400 bg-orange-50 dark:bg-orange-500/10',
+        'Medium': 'border-yellow-400 bg-yellow-50 dark:bg-yellow-500/10',
+        'Low': 'border-blue-400 bg-blue-50 dark:bg-blue-500/10',
+    };
+    const priorityTextStyles: Record<DetailedIncident['priority'], string> = {
+        'Critical': 'text-red-500 dark:text-red-400',
+        'High': 'text-orange-400 dark:text-orange-400',
+        'Medium': 'text-yellow-400 dark:text-yellow-400',
+        'Low': 'text-blue-400 dark:text-blue-400',
+    };
+
+    return (
+        <div className={`p-3 rounded-r-md border-l-4 ${priorityStyles[incident.priority]}`}>
+            <div className="flex justify-between items-center">
+                <div>
+                    <p className={`text-xs font-bold uppercase ${priorityTextStyles[incident.priority]}`}>{incident.priority}</p>
+                    <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist}</p>
+                </div>
+                <button className="text-primary-600 dark:text-primary-400 text-sm font-semibold self-start hover:underline">
+                    View
+                </button>
+            </div>
         </div>
-    </div>
-);
+    );
+};
 
+interface DashboardProps {
+    tourists: Tourist[];
+}
 
-const Dashboard: React.FC = () => {
+const Dashboard: React.FC<DashboardProps> = ({ tourists }) => {
+    const mapCoords = (lat: number, lng: number) => {
+        const mapX = ((lng - 77.1) / 0.2) * 300;
+        const mapY = ((28.7 - lat) / 0.2) * 180;
+        return { x: Math.max(0, Math.min(300, mapX)), y: Math.max(0, Math.min(180, mapY)) };
+    };
+
+    const touristPins = tourists
+        .filter(t => t.location)
+        .map(t => ({
+            id: t.touristId,
+            ...mapCoords(t.location!.lat, t.location!.lng),
+            color: 'rgba(255, 255, 0, 0.7)',
+            label: t.fullName
+        }));
+    
+    const priorityTasks = MOCK_DETAILED_INCIDENTS
+        .filter(incident => incident.status === 'Unassigned' && (incident.priority === 'Critical' || incident.priority === 'High'))
+        .slice(0, 4);
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Main Content Column */}
-      <div className="lg:col-span-2 space-y-6">
-        <Card>
-          <h2 className="text-lg font-semibold mb-4">Live Tourist Heat Map</h2>
-          <div className="h-96 bg-dark-900 rounded-md flex items-center justify-center">
-            <MapView pins={[{ x: 80, y: 50, color: 'red' }, { x: 120, y: 80, color: 'orange' }, { x: 95, y: 65, color: 'yellow' }]} />
-          </div>
-        </Card>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card>
-                <h2 className="text-lg font-semibold mb-4">High-Risk Zones</h2>
-                 <div className="h-64 bg-dark-900 rounded-md flex items-center justify-center">
-                    <MapView pins={[{ x: 30, y: 90, color: 'red' }]} />
-                 </div>
-            </Card>
-            <Card>
-                <h2 className="text-lg font-semibold mb-4">Alerts & Incidents</h2>
-                 <div className="h-64 bg-dark-900 rounded-md flex items-center justify-center">
-                    <p className="text-gray-500">Alerts & Incidents Chart</p>
-                 </div>
-            </Card>
-        </div>
-      </div>
+    <div className="space-y-6">
+       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         <StatCard title="Total Tourists" value="12,450" />
+         <StatCard title="Active Incidents" value="12" />
+         <StatCard title="Resolved Today" value="48" />
+         <StatCard title="Officers on Duty" value="24" />
+       </div>
+       
+       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card>
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Monthly Incident Overview</h2>
+                    <div style={{ width: '100%', height: 300 }}>
+                    <ResponsiveContainer>
+                        <BarChart data={REPORT_CHART_DATA} className="dark:text-gray-300">
+                        <XAxis dataKey="name" stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400"/>
+                        <YAxis stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400" />
+                        <Tooltip 
+                            cursor={{fill: 'rgba(113, 113, 122, 0.1)'}}
+                            contentStyle={{ 
+                              backgroundColor: 'var(--color-light-100, #ffffff)', 
+                              border: '1px solid var(--color-light-300, #e2e8f0)', 
+                              borderRadius: '0.5rem',
+                            }}
+                            />
+                        <Legend wrapperStyle={{fontSize: "14px"}}/>
+                        <Bar dataKey="Incidents" fill="#0ea5e9" name="Total Incidents" radius={[4, 4, 0, 0]} />
+                        <Bar dataKey="Resolved" fill="#84cc16" name="Incidents Resolved" radius={[4, 4, 0, 0]}/>
+                        </BarChart>
+                    </ResponsiveContainer>
+                    </div>
+                </Card>
+                <Card className="flex flex-col h-full">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Priority Action Items</h2>
+                    <div className="flex-grow space-y-3 -mx-1 px-1 overflow-y-auto">
+                        {priorityTasks.length > 0 ? (
+                            priorityTasks.map(task => <TaskItem key={task.id} incident={task} />)
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                                <p>No high-priority items.</p>
+                            </div>
+                        )}
+                    </div>
+                </Card>
+            </div>
+            <div>
+                 <Card className="h-full">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Live Alerts</h2>
+                    <div className="space-y-3">
+                        {MOCK_ACTIVE_ALERTS.map(alert => <AlertItem key={alert.id} alert={alert} />)}
+                    </div>
+                </Card>
+            </div>
+       </div>
 
-      {/* Right Sidebar Column */}
-      <div className="space-y-6">
         <Card>
-          <h2 className="text-lg font-semibold mb-4">Real-Time Stats</h2>
-          <div className="flex justify-around">
-            <StatCard value="12,450" label="Total Tourists" />
-            <StatCard value="348" label="Incidents Resolved" />
-            <StatCard value="12" label="Active Incidents" />
-            <StatCard value="28" label="Safe Zones" />
-          </div>
-        </Card>
-        <Card>
-          <h2 className="text-lg font-semibold mb-4">Active Alerts</h2>
-          <div className="space-y-3">
-            {MOCK_ALERTS.map(alert => <AlertItem key={alert.id} alert={alert} />)}
-          </div>
-        </Card>
-      </div>
+            <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Live Tourist Heatmap</h2>
+            <div className="h-96">
+                <MapView pins={touristPins} />
+            </div>
+       </Card>
+
     </div>
   );
 };

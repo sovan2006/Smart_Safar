@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
 import MapView from '../../shared/MapView';
+import { ArrowRightLeftIcon, AlertTriangleIcon, LightBulbIcon, BusIcon, ChevronDownIcon } from '../../../constants';
 
 // A local interface for map pins since it's not exported from MapView
 interface MapPin {
@@ -18,6 +19,19 @@ interface SafetyAnalysis {
     safestTransport: string;
     waypoints: { name: string, x: number, y: number }[];
 }
+
+const AccordionItem: React.FC<{ title: string; icon: React.ReactNode; children: React.ReactNode; defaultOpen?: boolean; }> = ({ title, icon, children, defaultOpen = false }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+    return (
+        <div className="border-b border-light-200 dark:border-dark-700">
+            <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center py-3 text-left">
+                <span className="flex items-center font-semibold text-gray-800 dark:text-gray-200">{icon}{title}</span>
+                <ChevronDownIcon className={`w-5 h-5 transition-transform text-gray-500 dark:text-gray-400 ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isOpen && <div className="pb-3 text-sm text-gray-600 dark:text-gray-400">{children}</div>}
+        </div>
+    );
+};
 
 const SafeNavigationScreen: React.FC = () => {
     const [startLocation, setStartLocation] = useState('India Gate, New Delhi');
@@ -96,7 +110,6 @@ The waypoints array must start with the starting location and end with the desti
                 }));
                 setMapPins(pins);
             }
-
         } catch (e) {
             console.error("Error analyzing route:", e);
             setError("Sorry, we couldn't analyze the route at this time. Please try again.");
@@ -104,79 +117,94 @@ The waypoints array must start with the starting location and end with the desti
             setLoading(false);
         }
     }
+    
+    const handleReset = () => {
+        setAnalysisResult(null);
+        setMapPins([]);
+        setError('');
+    };
+
+    const swapLocations = () => {
+        setStartLocation(destination);
+        setDestination(startLocation);
+    };
+    
+    const safetyScoreValue = analysisResult ? parseInt(analysisResult.safetyScore.split('/')[0]) * 10 : 0;
+    const scoreColor = safetyScoreValue > 70 ? 'text-green-500' : safetyScoreValue > 40 ? 'text-yellow-500' : 'text-red-500';
 
     return (
-        <div className="p-4 space-y-4">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Live Map & Safe Navigation</h1>
-
-            <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm space-y-4">
-                <div>
-                    <label className="text-sm text-gray-600 dark:text-gray-400">From</label>
-                    <input type="text" value={startLocation} onChange={(e) => setStartLocation(e.target.value)} placeholder="e.g., India Gate, New Delhi" className="w-full mt-1 p-2 border border-light-300 dark:border-dark-700 bg-white dark:bg-dark-900 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"/>
-                </div>
-                 <div>
-                    <label className="text-sm text-gray-600 dark:text-gray-400">To</label>
-                    <input type="text" value={destination} onChange={(e) => setDestination(e.target.value)} placeholder="e.g., Connaught Place, New Delhi" className="w-full mt-1 p-2 border border-light-300 dark:border-dark-700 bg-white dark:bg-dark-900 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"/>
-                </div>
-                <button onClick={handleAnalyzeRoute} disabled={loading} className="w-full bg-primary-600 text-white py-2 rounded-lg font-semibold transition-colors hover:bg-primary-700 disabled:bg-primary-300 disabled:cursor-not-allowed">
-                    {loading ? 'Analyzing...' : 'Analyze Safe Route'}
-                </button>
+        <div className="flex flex-col h-full w-full bg-light-200 dark:bg-dark-900">
+            <div className="flex-grow relative">
+                <MapView pins={mapPins} alwaysShowLabels showRoute className="absolute inset-0" />
+                {loading && (
+                    <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+                        <p className="text-white font-semibold">AI is analyzing your route...</p>
+                    </div>
+                )}
             </div>
-
-            {error && <div className="bg-red-100 dark:bg-red-500/20 text-red-700 dark:text-red-400 p-3 rounded-xl shadow-sm text-sm" role="alert">{error}</div>}
-
-            {loading && (
-                <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm text-center">
-                    <div className="w-12 h-12 mx-auto bg-light-200 dark:bg-dark-700 rounded-full flex items-center justify-center mb-2 animate-pulse">
-                         <svg className="w-6 h-6 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L15 12l-6 3zm0 0l6-3m-6 3V7" />
-                        </svg>
-                    </div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Our AI is analyzing the safest route for you...</p>
-                </div>
-            )}
             
-            {!loading && !analysisResult && !error && (
-                <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm text-center">
-                    <div className="w-12 h-12 mx-auto bg-light-200 dark:bg-dark-700 rounded-full flex items-center justify-center mb-2">📍</div>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Enter a start and destination to get an AI-powered safety analysis of the best route.</p>
-                </div>
-            )}
+            <div className="flex-shrink-0 bg-light-100 dark:bg-dark-800 p-4 rounded-t-2xl shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_25px_-5px_rgba(0,0,0,0.2)] z-20">
+                <div className="w-10 h-1.5 bg-light-300 dark:bg-dark-600 rounded-full mx-auto mb-3"></div>
+                
+                {!analysisResult ? (
+                    <div className="space-y-4">
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">Plan a Safe Route</h2>
+                        <div className="relative">
+                            <InputField label="From" value={startLocation} onChange={(e) => setStartLocation(e.target.value)} />
+                            <InputField label="To" value={destination} onChange={(e) => setDestination(e.target.value)} />
+                            <button onClick={swapLocations} className="absolute top-1/2 -translate-y-1/2 right-2 p-2 rounded-full bg-light-200 dark:bg-dark-700 hover:bg-light-300 dark:hover:bg-dark-600 transition-colors" aria-label="Swap locations">
+                                <ArrowRightLeftIcon className="w-4 h-4 text-gray-600 dark:text-gray-300"/>
+                            </button>
+                        </div>
+                        <button onClick={handleAnalyzeRoute} disabled={loading} className="w-full bg-primary-600 text-white py-3 rounded-lg font-semibold transition-colors hover:bg-primary-700 disabled:bg-primary-300 disabled:cursor-not-allowed">
+                            Analyze Safe Route
+                        </button>
+                        {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+                    </div>
+                ) : (
+                    <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100">AI Safety Analysis</h2>
+                            <button onClick={handleReset} className="text-sm font-semibold text-primary-600 hover:underline">New Route</button>
+                        </div>
 
-            {analysisResult && (
-                <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm space-y-4">
-                    <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">AI Route Safety Analysis</h2>
-                    <div>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300">Overall Safety Score</h3>
-                        <p className="text-2xl font-bold text-primary-600 dark:text-primary-400">{analysisResult.safetyScore}</p>
+                        <div className="bg-light-200 dark:bg-dark-700/50 p-4 rounded-xl flex items-center gap-4">
+                            <div className="relative w-20 h-20 flex-shrink-0">
+                                <svg className="w-full h-full" viewBox="0 0 36 36" transform="rotate(-90)">
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className="stroke-current text-light-300 dark:text-dark-600" strokeWidth="3" />
+                                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" className={`stroke-current ${scoreColor}`} strokeWidth="3" strokeDasharray={`${safetyScoreValue}, 100`} strokeLinecap="round"/>
+                                </svg>
+                                <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-xl font-bold text-gray-800 dark:text-gray-200">{analysisResult.safetyScore}</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-800 dark:text-gray-200">Safest Transport</h3>
+                                <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2"><BusIcon className="w-4 h-4" />{analysisResult.safestTransport}</p>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <AccordionItem title="Potential Risks" icon={<AlertTriangleIcon className="w-5 h-5 mr-2 text-yellow-500" />} defaultOpen>
+                                 <ul className="list-disc list-inside space-y-1 mt-1 pl-2">{analysisResult.potentialRisks.map((risk, index) => <li key={index}>{risk}</li>)}</ul>
+                            </AccordionItem>
+                            <AccordionItem title="Recommendations" icon={<LightBulbIcon className="w-5 h-5 mr-2 text-green-500" />}>
+                                 <ul className="list-disc list-inside space-y-1 mt-1 pl-2">{analysisResult.recommendations.map((rec, index) => <li key={index}>{rec}</li>)}</ul>
+                            </AccordionItem>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300">Potential Risks</h3>
-                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1 mt-1">
-                            {analysisResult.potentialRisks.map((risk, index) => <li key={index}>{risk}</li>)}
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300">Safety Recommendations</h3>
-                        <ul className="list-disc list-inside text-sm text-gray-600 dark:text-gray-400 space-y-1 mt-1">
-                            {analysisResult.recommendations.map((rec, index) => <li key={index}>{rec}</li>)}
-                        </ul>
-                    </div>
-                    <div>
-                        <h3 className="font-semibold text-gray-700 dark:text-gray-300">Safest Mode of Transport</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">{analysisResult.safestTransport}</p>
-                    </div>
-                </div>
-            )}
-
-             <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
-                 <h2 className="font-semibold mb-2 text-gray-900 dark:text-gray-100">Recommended Route</h2>
-                 <div className="h-48 bg-gray-200 dark:bg-dark-700 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400">
-                    <MapView pins={mapPins} alwaysShowLabels showRoute />
-                 </div>
+                )}
             </div>
         </div>
-    )
+    );
 };
+
+const InputField: React.FC<{ label: string; value: string; onChange: (e: React.ChangeEvent<HTMLInputElement>) => void; }> = ({ label, value, onChange }) => (
+    <div className="mb-1">
+        <label className="text-xs font-medium text-gray-500 dark:text-gray-400 px-1">{label}</label>
+        <input type="text" value={value} onChange={onChange} className="w-full bg-transparent p-1 border-b-2 border-light-300 dark:border-dark-600 focus:border-primary-500 outline-none transition-colors" />
+    </div>
+);
 
 export default SafeNavigationScreen;

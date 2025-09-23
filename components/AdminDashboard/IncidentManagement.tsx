@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, FormEvent, ChangeEvent, useMemo } from 'react';
 import Card from '../shared/Card';
-import { SearchIcon, ThreeDotsIcon } from '../../constants';
+import { SearchIcon, ThreeDotsIcon, IncidentIcon, PriorityHighIcon, PriorityMediumIcon, PriorityLowIcon } from '../../constants';
 import { MOCK_DETAILED_INCIDENTS } from '../../constants';
 import { DetailedIncident, Tourist } from '../../types';
 import MapView from '../shared/MapView';
@@ -134,14 +134,35 @@ const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClos
 }
 
 // --- RENDER HELPER FUNCTIONS & COMPONENTS --- //
-const getPriorityStyling = (priority: DetailedIncident['priority']) => {
+const PriorityBadge: React.FC<{ priority: DetailedIncident['priority'] }> = ({ priority }) => {
+    let icon: React.ReactNode;
+    let classes = 'flex items-center space-x-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ';
+
     switch (priority) {
-        case 'Critical': return { border: 'border-red-500', text: 'text-red-600 dark:text-red-400' };
-        case 'High': return { border: 'border-orange-500', text: 'text-orange-600 dark:text-orange-400' };
-        case 'Medium': return { border: 'border-yellow-500', text: 'text-yellow-600 dark:text-yellow-400' };
-        case 'Low': return { border: 'border-blue-500', text: 'text-blue-600 dark:text-blue-400' };
-        default: return { border: 'border-transparent', text: 'text-gray-600 dark:text-gray-400' };
+        case 'Critical':
+            icon = <IncidentIcon className="w-3.5 h-3.5" />; // Re-using this one
+            classes += 'bg-red-100 text-red-800 dark:bg-red-500/20 dark:text-red-300';
+            break;
+        case 'High':
+            icon = <PriorityHighIcon className="w-3.5 h-3.5" />;
+            classes += 'bg-orange-100 text-orange-800 dark:bg-orange-500/20 dark:text-orange-300';
+            break;
+        case 'Medium':
+            icon = <PriorityMediumIcon className="w-3.5 h-3.5" />;
+            classes += 'bg-yellow-100 text-yellow-800 dark:bg-yellow-500/20 dark:text-yellow-300';
+            break;
+        case 'Low':
+            icon = <PriorityLowIcon className="w-3.5 h-3.5" />;
+            classes += 'bg-blue-100 text-blue-800 dark:bg-blue-500/20 dark:text-blue-300';
+            break;
     }
+
+    return (
+        <div className={classes}>
+            {icon}
+            <span>{priority}</span>
+        </div>
+    );
 };
 
 const getStatusClasses = (status: DetailedIncident['status']) => {
@@ -171,17 +192,15 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
-    
-    const priorityClasses = getPriorityStyling(incident.priority);
 
     return (
-        <tr className={`border-b border-light-200 dark:border-dark-700 last:border-0 hover:bg-light-200/50 dark:hover:bg-dark-700/50 border-l-4 ${priorityClasses.border}`}>
+        <tr className="border-b border-light-200 dark:border-dark-700 last:border-0 hover:bg-light-200/50 dark:hover:bg-dark-700/50">
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.time}</td>
             <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{incident.id}</td>
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.type}</td>
             <td className="px-4 py-3 font-medium text-gray-800 dark:text-gray-200">{incident.tourist}</td>
             <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400">{incident.location}</td>
-            <td className={`px-4 py-3 font-semibold ${priorityClasses.text}`}>{incident.priority}</td>
+            <td className="px-4 py-3"><PriorityBadge priority={incident.priority} /></td>
             <td className="px-4 py-3"><span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span></td>
             <td className="px-4 py-3 text-center">
                  <div className="relative" ref={menuRef}>
@@ -201,30 +220,27 @@ const IncidentRow: React.FC<{ incident: DetailedIncident; onViewDetails: () => v
     );
 };
 
-const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => {
-    const priorityClasses = getPriorityStyling(incident.priority);
-    return (
-        <Card className={`!p-0 mb-4 overflow-hidden border-l-4 ${priorityClasses.border}`}>
-            <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                        <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist} - {incident.location}</p>
-                    </div>
-                    <span className={`text-sm font-bold ${priorityClasses.text}`}>{incident.priority}</span>
+const IncidentCard: React.FC<{ incident: DetailedIncident; onViewDetails: () => void; onEdit: () => void; }> = ({ incident, onViewDetails, onEdit }) => (
+    <Card className="!p-0 mb-4 overflow-hidden">
+        <div className="p-4">
+            <div className="flex justify-between items-start mb-2">
+                <div>
+                    <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist} - {incident.location}</p>
                 </div>
-                <div className="flex justify-between items-center text-xs">
-                    <span className={`px-2 py-1 font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span>
-                    <span className="text-gray-400">{incident.time}</span>
-                </div>
+                <PriorityBadge priority={incident.priority} />
             </div>
-            <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end space-x-4">
-                <button onClick={onEdit} className="text-sm font-semibold text-primary-600 dark:text-primary-400">Edit</button>
-                <button onClick={onViewDetails} className="text-sm font-semibold text-primary-600 dark:text-primary-400">View Details</button>
+            <div className="flex justify-between items-center text-xs">
+                <span className={`px-2 py-1 font-semibold rounded-full ${getStatusClasses(incident.status)}`}>{incident.status}</span>
+                <span className="text-gray-400">{incident.time}</span>
             </div>
-        </Card>
-    );
-};
+        </div>
+        <div className="bg-light-200/50 dark:bg-dark-700/50 px-4 py-2 flex justify-end space-x-4">
+            <button onClick={onEdit} className="text-sm font-semibold text-primary-600 dark:text-primary-400">Edit</button>
+            <button onClick={onViewDetails} className="text-sm font-semibold text-primary-600 dark:text-primary-400">View Details</button>
+        </div>
+    </Card>
+);
 
 interface IncidentManagementProps {
     tourists: Tourist[];
@@ -386,7 +402,7 @@ const IncidentManagement: React.FC<IncidentManagementProps> = ({ tourists }) => 
                                         <th className="px-4 py-2 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider text-center">Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody>
+                                <tbody className="divide-y divide-light-200 dark:divide-dark-700">
                                     {sortedAndFilteredIncidents.map(incident => 
                                         <IncidentRow 
                                             key={incident.id} 

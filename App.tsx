@@ -11,7 +11,7 @@ type AppView = 'Login' | 'Register' | 'Admin' | 'Tourist';
 
 const App: React.FC = () => {
   const [view, setView] = useState<AppView>('Login');
-  const [tourists, setTourists] = useState<Tourist[]>([]);
+  const [tourists, setTourists] = useState<Tourist[]>(MOCK_TOURISTS_DATA);
   const [currentUser, setCurrentUser] = useState<Tourist | null>(null);
   const [loginError, setLoginError] = useState('');
   const [isAppLoading, setIsAppLoading] = useState(true);
@@ -41,7 +41,7 @@ const App: React.FC = () => {
     setIsAppLoading(true);
     setLoginError('');
     
-    // Load mock tourist data into state
+    // In a real app with a backend, this would be fetched. For now, we use mock data.
     setTourists(MOCK_TOURISTS_DATA);
 
     // Check for a saved user session in localStorage
@@ -112,7 +112,6 @@ const App: React.FC = () => {
       const updatedUser = { ...currentUser, location: { ...location, timestamp: Date.now() } };
       setCurrentUser(updatedUser);
       setTourists(prev => prev.map(t => t.email === currentUser.email ? updatedUser : t));
-      // No server update needed; location is updated in the local state.
     }
   };
   
@@ -124,8 +123,12 @@ const App: React.FC = () => {
 
   const handleSwitchToTouristView = () => {
     if (tourists.length > 0) {
-      setCurrentUser(tourists[0]);
-      setView('Tourist');
+      const userToLogin = MOCK_TOURISTS_DATA.find(user => user.email === 'tourist@smartsafar.com');
+      if(userToLogin) {
+        localStorage.setItem('currentUser', JSON.stringify(userToLogin));
+        setCurrentUser(userToLogin);
+        setView('Tourist');
+      }
     } else {
       alert("No tourist accounts are available to display.");
     }

@@ -112,6 +112,22 @@ const TouristHomeScreen: React.FC<TouristHomeScreenProps> = ({ currentUser, setA
     },
   ];
 
+  const mapCoords = (lat: number, lng: number) => {
+    // This is a simplified mapping for demonstration purposes for the Delhi area.
+    const mapX = ((lng - 77.1) / 0.2) * 300;
+    const mapY = ((28.7 - lat) / 0.2) * 180;
+    return { x: Math.max(10, Math.min(290, mapX)), y: Math.max(10, Math.min(170, mapY)) };
+  };
+
+  const userPin = currentUser.location 
+    ? [{ 
+        id: 'user', 
+        ...mapCoords(currentUser.location.lat, currentUser.location.lng), 
+        color: '#16a34a',
+        label: 'You' 
+      }] 
+    : [];
+
   return (
     <div className="p-4 space-y-4 bg-light-200 dark:bg-dark-900 h-full overflow-y-auto">
       <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
@@ -139,7 +155,7 @@ const TouristHomeScreen: React.FC<TouristHomeScreenProps> = ({ currentUser, setA
        <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm mt-4">
           <h2 className="font-semibold mb-2 flex items-center text-gray-900 dark:text-gray-100">{t('liveMapView')} <span className="ml-2 w-2 h-2 rounded-full bg-red-500 animate-pulse"></span> <span className="ml-1 text-xs text-red-500">{t('live')}</span></h2>
           <div className="h-48 bg-gray-200 dark:bg-dark-700 rounded-lg flex items-center justify-center text-gray-500 dark:text-gray-400">
-            <MapView pins={[{x: 100, y: 60, color: 'green', label: 'You'}]} />
+            <MapView pins={userPin} />
           </div>
         </div>
     </div>

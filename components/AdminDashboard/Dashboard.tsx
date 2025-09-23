@@ -1,8 +1,8 @@
 import React from 'react';
 import Card from '../shared/Card';
-import { MOCK_ACTIVE_ALERTS, REPORT_CHART_DATA } from '../../constants';
+import { MOCK_ACTIVE_ALERTS, MOCK_DETAILED_INCIDENTS, REPORT_CHART_DATA } from '../../constants';
 import MapView from '../shared/MapView';
-import { ActiveAlert, Tourist } from '../../types';
+import { ActiveAlert, DetailedIncident, Tourist } from '../../types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const StatCard: React.FC<{ title: string; value: string; }> = ({ title, value }) => (
@@ -32,6 +32,36 @@ const AlertItem: React.FC<{ alert: ActiveAlert }> = ({ alert }) => {
     )
 }
 
+const TaskItem: React.FC<{ incident: DetailedIncident }> = ({ incident }) => {
+    const priorityStyles: Record<DetailedIncident['priority'], string> = {
+        'Critical': 'border-red-500 bg-red-50 dark:bg-red-500/10',
+        'High': 'border-orange-400 bg-orange-50 dark:bg-orange-500/10',
+        'Medium': 'border-yellow-400 bg-yellow-50 dark:bg-yellow-500/10',
+        'Low': 'border-blue-400 bg-blue-50 dark:bg-blue-500/10',
+    };
+    const priorityTextStyles: Record<DetailedIncident['priority'], string> = {
+        'Critical': 'text-red-500 dark:text-red-400',
+        'High': 'text-orange-400 dark:text-orange-400',
+        'Medium': 'text-yellow-400 dark:text-yellow-400',
+        'Low': 'text-blue-400 dark:text-blue-400',
+    };
+
+    return (
+        <div className={`p-3 rounded-r-md border-l-4 ${priorityStyles[incident.priority]}`}>
+            <div className="flex justify-between items-center">
+                <div>
+                    <p className={`text-xs font-bold uppercase ${priorityTextStyles[incident.priority]}`}>{incident.priority}</p>
+                    <p className="font-semibold text-gray-800 dark:text-gray-200">{incident.type}</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">{incident.tourist}</p>
+                </div>
+                <button className="text-primary-600 dark:text-primary-400 text-sm font-semibold self-start hover:underline">
+                    View
+                </button>
+            </div>
+        </div>
+    );
+};
+
 interface DashboardProps {
     tourists: Tourist[];
 }
@@ -51,6 +81,10 @@ const Dashboard: React.FC<DashboardProps> = ({ tourists }) => {
             color: 'rgba(255, 255, 0, 0.7)',
             label: t.fullName
         }));
+    
+    const priorityTasks = MOCK_DETAILED_INCIDENTS
+        .filter(incident => incident.status === 'Unassigned' && (incident.priority === 'Critical' || incident.priority === 'High'))
+        .slice(0, 4);
 
   return (
     <div className="space-y-6">
@@ -62,12 +96,12 @@ const Dashboard: React.FC<DashboardProps> = ({ tourists }) => {
        </div>
        
        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
+            <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card>
                     <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Monthly Incident Overview</h2>
                     <div style={{ width: '100%', height: 300 }}>
                     <ResponsiveContainer>
-                        <BarChart data={REPORT_CHART_DATA}>
+                        <BarChart data={REPORT_CHART_DATA} className="dark:text-gray-300">
                         <XAxis dataKey="name" stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400"/>
                         <YAxis stroke="currentColor" tick={{ fontSize: 12 }} className="text-gray-500 dark:text-gray-400" />
                         <Tooltip 
@@ -75,14 +109,26 @@ const Dashboard: React.FC<DashboardProps> = ({ tourists }) => {
                             contentStyle={{ 
                               backgroundColor: 'var(--color-light-100, #ffffff)', 
                               border: '1px solid var(--color-light-300, #e2e8f0)', 
-                              borderRadius: '0.5rem'
+                              borderRadius: '0.5rem',
                             }}
                             />
-                        <Legend />
+                        <Legend wrapperStyle={{fontSize: "14px"}}/>
                         <Bar dataKey="Incidents" fill="#0ea5e9" name="Total Incidents" radius={[4, 4, 0, 0]} />
                         <Bar dataKey="Resolved" fill="#84cc16" name="Incidents Resolved" radius={[4, 4, 0, 0]}/>
                         </BarChart>
                     </ResponsiveContainer>
+                    </div>
+                </Card>
+                <Card className="flex flex-col h-full">
+                    <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">Priority Action Items</h2>
+                    <div className="flex-grow space-y-3 -mx-1 px-1 overflow-y-auto">
+                        {priorityTasks.length > 0 ? (
+                            priorityTasks.map(task => <TaskItem key={task.id} incident={task} />)
+                        ) : (
+                            <div className="flex items-center justify-center h-full text-gray-500 dark:text-gray-400">
+                                <p>No high-priority items.</p>
+                            </div>
+                        )}
                     </div>
                 </Card>
             </div>
