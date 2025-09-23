@@ -138,24 +138,48 @@ export const ClockIcon: React.FC<{className?: string}> = ({className}) => (
     </svg>
 );
 
-// FIX: Added missing PriorityHighIcon component.
 export const PriorityHighIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4 12l1.41 1.41L11 7.83V20h2V7.83l5.58 5.59L20 12l-8-8-8 8z"/>
+        <circle cx="12" cy="19" r="2" /><path d="M10 3h4v12h-4z" />
     </svg>
 );
 
-// FIX: Added missing PriorityMediumIcon component.
 export const PriorityMediumIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M4 11h16v2H4z"/>
+        <path d="M22 11h-2V9h2v2zm0-4h-2V5h2v2zm0 8h-2v-2h2v2zm-4 4h-2v-2h2v2zM12 3h-2v2h2V3zm0 16h-2v2h2v-2zM8 3H6v2h2V3zM4 17H2v-2h2v2zm0-4H2v-2h2v2zm0-4H2V7h2v2zm12-4h-2V3h2v2z" />
     </svg>
 );
 
-// FIX: Added missing PriorityLowIcon component.
 export const PriorityLowIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z"/>
+       <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/>
+    </svg>
+);
+
+export const ArrowRightLeftIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5" />
+    </svg>
+);
+export const AlertTriangleIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+    </svg>
+);
+export const LightBulbIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.311a7.5 7.5 0 00-7.5 0c-.433.08-.864.166-1.288.25M12 3.75a7.5 7.5 0 017.5 7.5c0 3.866-2.595 7.141-6.072 7.828" />
+    </svg>
+);
+export const BusIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm0 2h12v3H4V5zm0 5h12v2H4v-2z" clipRule="evenodd" />
+      <path d="M2 9a1 1 0 011-1h14a1 1 0 110 2H3a1 1 0 01-1-1z" />
+    </svg>
+);
+export const ChevronDownIcon: React.FC<{className?: string}> = ({className}) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
     </svg>
 );
 

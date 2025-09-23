@@ -75,10 +75,10 @@ const IncidentFormModal: React.FC<{
                      <div>
                         <label className="text-sm font-medium text-gray-600 dark:text-gray-400">Priority</label>
                         <select name="priority" value={formData.priority} onChange={handleChange} required className="w-full mt-1 p-2 border border-light-300 dark:border-dark-600 bg-white dark:bg-dark-900 rounded-lg">
-                            <option>Low</option>
-                            <option>Medium</option>
-                            <option>High</option>
-                            <option>Critical</option>
+                           <option>Low</option>
+                           <option>Medium</option>
+                           <option>High</option>
+                           <option>Critical</option>
                         </select>
                     </div>
                      <div>
@@ -100,8 +100,23 @@ const IncidentFormModal: React.FC<{
     );
 };
 
+const mapCoords = (lat: number, lng: number) => {
+    // This coordinate system is based on the mock data for Arunachal Pradesh, consistent with IncidentResponse view
+    const minLng = 91.5, maxLng = 94.0;
+    const minLat = 27.4, maxLat = 28.0;
+    const mapWidth = 300, mapHeight = 180;
+    const padding = 15;
+    const x = ((lng - minLng) / (maxLng - minLng)) * (mapWidth - padding * 2) + padding;
+    const y = ((maxLat - lat) / (maxLat - minLat)) * (mapHeight - padding * 2) + padding;
+    // Clamp values to be within map boundaries
+    return { x: Math.max(padding, Math.min(mapWidth - padding, x)), y: Math.max(padding, Math.min(mapHeight - padding, y)) };
+};
+
 const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClose: () => void; }> = ({ incident, onClose }) => {
     if (!incident) return null;
+    
+    const pin = incident.lat && incident.lng ? [{ id: incident.id, ...mapCoords(incident.lat, incident.lng), color: 'red', label: incident.tourist }] : [];
+
     return (
          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-light-100 dark:bg-dark-800 rounded-xl shadow-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
@@ -121,7 +136,7 @@ const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClos
                      <div>
                         <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Location on Map</h3>
                         <div className="h-48 bg-light-200 dark:bg-dark-700 rounded-lg">
-                           <MapView pins={incident.lat && incident.lng ? [{ id: incident.id, x: 150, y: 90, color: 'red', label: incident.tourist }] : []} />
+                           <MapView pins={pin} />
                         </div>
                     </div>
                     <div className="flex justify-end space-x-3 pt-4">

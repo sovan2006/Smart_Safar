@@ -100,8 +100,16 @@ const IncidentFormModal: React.FC<{
     );
 };
 
+const mapCoords = (lat: number, lng: number) => {
+    const mapX = ((lng - 77.1) / 0.2) * 300;
+    const mapY = ((28.7 - lat) / 0.2) * 180;
+    return { x: Math.max(0, Math.min(300, mapX)), y: Math.max(0, Math.min(180, mapY)) };
+};
+
 const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClose: () => void; }> = ({ incident, onClose }) => {
     if (!incident) return null;
+    const pin = incident.lat && incident.lng ? [{ id: incident.id, ...mapCoords(incident.lat, incident.lng), color: 'red', label: incident.tourist }] : [];
+    
     return (
          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
             <div className="bg-light-100 dark:bg-dark-800 rounded-xl shadow-2xl p-6 w-full max-w-lg" onClick={e => e.stopPropagation()}>
@@ -121,7 +129,7 @@ const IncidentDetailsModal: React.FC<{ incident: DetailedIncident | null; onClos
                      <div>
                         <h3 className="text-md font-semibold mb-2 text-gray-800 dark:text-gray-200">Location on Map</h3>
                         <div className="h-48 bg-light-200 dark:bg-dark-700 rounded-lg">
-                           <MapView pins={incident.lat && incident.lng ? [{ id: incident.id, x: 150, y: 90, color: 'red', label: incident.tourist }] : []} />
+                           <MapView pins={pin} />
                         </div>
                     </div>
                     <div className="flex justify-end space-x-3 pt-4">
