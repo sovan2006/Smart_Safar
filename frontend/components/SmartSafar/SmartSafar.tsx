@@ -36,8 +36,42 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
   const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
+    if (!isTrackingEnabled) {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+        watchIdRef.current = null;
+        setIsDisplayingTracking(false);
+      }
+      return;
+    }
+
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by this browser.");
+      return;
+    }
+
+    // Attempt to get a quick, low-accuracy position first for better UX
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocationError(null);
+        const { latitude, longitude } = position.coords;
+        onLocationUpdate({ lat: latitude, lng: longitude });
+        setIsDisplayingTracking(true);
+      },
+      () => {
+        // We don't need to show an error here, as the high-accuracy watcher will try next.
+        console.warn("Could not get a quick location fix. Waiting for high-accuracy watcher.");
+      },
+      {
+        enableHighAccuracy: false,
+        timeout: 5000, // 5 seconds for a quick fix
+        maximumAge: 60000, // OK to use a cached position up to 1 minute old
+      }
+    );
+
+    // Start the high-accuracy watcher
     const startWatcher = () => {
-      if (navigator.geolocation && watchIdRef.current === null) {
+      if (watchIdRef.current === null) {
         watchIdRef.current = navigator.geolocation.watchPosition(
           (position) => {
             setLocationError(null);
@@ -55,36 +89,31 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
                 message = 'Location information is currently unavailable. Please check your device settings.';
                 break;
               case error.TIMEOUT:
-                message = 'The request to get user location timed out.';
+                message = 'The request to get user location timed out. The device may be unable to get a satellite fix.';
                 break;
             }
             console.error(`Geolocation error: ${error.message}`);
             setLocationError(message);
             setIsDisplayingTracking(false);
           },
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          {
+            enableHighAccuracy: true,
+            timeout: 20000, // Increased timeout to 20 seconds
+            maximumAge: 0, // Force a new position
+          }
         );
-      } else if (!navigator.geolocation) {
-         setLocationError("Geolocation is not supported by this browser.");
       }
     };
 
-    const stopWatcher = () => {
+    startWatcher();
+
+    // Cleanup function
+    return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
         watchIdRef.current = null;
         setIsDisplayingTracking(false);
       }
-    };
-
-    if (isTrackingEnabled) {
-      startWatcher();
-    } else {
-      stopWatcher();
-    }
-
-    return () => {
-      stopWatcher(); // Cleanup on component unmount
     };
   }, [isTrackingEnabled, onLocationUpdate]);
 
