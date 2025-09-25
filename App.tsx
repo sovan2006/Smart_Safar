@@ -71,13 +71,12 @@ const App: React.FC = () => {
         setLoginError('Invalid admin credentials.');
       }
     } else {
-      // Simulate tourist login against mock data
-      const foundUser = MOCK_TOURISTS_DATA.find(
+      // Login against the current list of tourists (including newly registered ones)
+      const foundUser = tourists.find(
         user => user.email === email && user.password === password
       );
       
       if (foundUser) {
-        // Create a copy to avoid modifying the constant
         const userToSave = { ...foundUser };
         localStorage.setItem('currentUser', JSON.stringify(userToSave));
         setCurrentUser(userToSave);
@@ -89,16 +88,37 @@ const App: React.FC = () => {
   };
   
   const handleRegister = async (newUserData: Pick<Tourist, 'fullName' | 'mobileNumber' | 'email' | 'password'>) => {
-    // This is a mock registration. It doesn't persist the new user.
+    const userExists = tourists.some(user => user.email === newUserData.email);
+    if (userExists) {
+        alert('An account with this email already exists. Please log in.');
+        setView('Login');
+        return;
+    }
+
+    // Create a new user object
+    const newUser: Tourist = {
+        ...newUserData,
+        touristId: `T-${Math.floor(Math.random() * 90000) + 10000}`,
+    };
+    
+    // Add the new user to the state
+    setTourists(prevTourists => [...prevTourists, newUser]);
+
     alert('Registration successful! Please log in.');
     setView('Login');
   };
   
   const handlePasswordReset = async (email: string, newPassword: string): Promise<boolean> => {
     setLoginError('');
-    const userExists = MOCK_TOURISTS_DATA.some(user => user.email === email);
-    if (userExists) {
-        // In a real app, you'd update the password. Here, we just confirm success.
+    // Find user in the current state
+    const userIndex = tourists.findIndex(user => user.email === email);
+    
+    if (userIndex > -1) {
+        // Create a new array with the updated user
+        const updatedTourists = [...tourists];
+        updatedTourists[userIndex] = { ...updatedTourists[userIndex], password: newPassword };
+        setTourists(updatedTourists);
+
         console.log(`Password for ${email} has been reset to "${newPassword}" (simulation).`);
         return true;
     } else {
@@ -123,11 +143,13 @@ const App: React.FC = () => {
 
   const handleSwitchToTouristView = () => {
     if (tourists.length > 0) {
-      const userToLogin = MOCK_TOURISTS_DATA.find(user => user.email === 'tourist@smartsafar.com');
+      const userToLogin = tourists.find(user => user.email === 'tourist@smartsafar.com');
       if(userToLogin) {
         localStorage.setItem('currentUser', JSON.stringify(userToLogin));
         setCurrentUser(userToLogin);
         setView('Tourist');
+      } else {
+        alert("Default tourist account not found.");
       }
     } else {
       alert("No tourist accounts are available to display.");

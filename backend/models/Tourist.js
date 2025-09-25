@@ -17,6 +17,7 @@ const TouristSchema = new mongoose.Schema({
   fatherName: { type: String },
   motherName: { type: String },
   isTrackingEnabled: { type: Boolean, default: false },
+  profilePictureUrl: { type: String },
   location: {
     lat: { type: Number },
     lng: { type: Number },

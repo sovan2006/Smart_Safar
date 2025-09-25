@@ -27,13 +27,14 @@ export interface Tourist {
   fullName: string;
   mobileNumber: string;
   email: string;
-  password: string;
+  password?: string; // Made password optional as it won't be sent from backend
   touristId?: string;
   nationality?: string;
   dateOfBirth?: string;
   fatherName?: string;
   motherName?: string;
   isTrackingEnabled?: boolean;
+  profilePictureUrl?: string;
   location?: {
     lat: number;
     lng: number;

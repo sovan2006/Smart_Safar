@@ -1,5 +1,5 @@
 import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
-import { TouristScreen, Tourist, EmergencyContact } from '../../../types';
+import { TouristScreen, Tourist } from '../../../types';
 import CameraCapture from '../../shared/CameraCapture';
 
 interface ProfileScreenProps {
@@ -41,11 +41,13 @@ const ProfileModal: React.FC<{
     );
 };
 
+const defaultPfp = 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg';
+
 const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, setActiveScreen, onUpdateUser }) => {
-    const [pfpSrc, setPfpSrc] = useState('https://picsum.photos/id/1027/200/200');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pfpSrc = currentUser.profilePictureUrl || defaultPfp;
 
     const [isEditing, setIsEditing] = useState(false);
     const [userDetails, setUserDetails] = useState<UserDetails>({
@@ -59,6 +61,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
 
     const [newContact, setNewContact] = useState({ name: '', phone: '' });
     const emergencyContacts = currentUser.emergencyContacts || [];
+
+    const handleUpdatePhoto = (newUrl: string) => {
+        onUpdateUser({ ...currentUser, profilePictureUrl: newUrl });
+    };
 
     const handleUserDetailsChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -98,7 +104,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
         if (file) {
             const reader = new FileReader();
             reader.onload = (e) => {
-                setPfpSrc(e.target?.result as string);
+                const newUrl = e.target?.result as string;
+                handleUpdatePhoto(newUrl);
             };
             reader.readAsDataURL(file);
         }
@@ -115,12 +122,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
     };
     
     const handleCapture = (imageDataUrl: string) => {
-        setPfpSrc(imageDataUrl);
+        handleUpdatePhoto(imageDataUrl);
         setIsCameraOpen(false);
     };
 
     const handleRemovePhoto = () => {
-        setPfpSrc('https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg');
+        // Send an empty string to clear the photo
+        handleUpdatePhoto('');
         setIsModalOpen(false);
     };
 

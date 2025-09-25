@@ -36,9 +36,13 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
 
   const handleSendOtp = () => {
     setError('');
-    if (!email) {
+    if (!email.trim()) {
       setError('Please enter your email address.');
       return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+        setError('Please enter a valid email address.');
+        return;
     }
     const userExists = users.some(u => u.email === email);
     if (!userExists) {
@@ -59,6 +63,14 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
 
   const handleVerifyOtp = () => {
     setError('');
+    if (!userOtp.trim()) {
+      setError('Please enter the OTP.');
+      return;
+    }
+    if (!/^\d{6}$/.test(userOtp)) {
+      setError('OTP must be 6 digits.');
+      return;
+    }
     if (userOtp !== generatedOtp) {
       setError('Invalid OTP. Please try again.');
       return;
@@ -72,12 +84,12 @@ const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen, onClo
       setError('Please fill in both password fields.');
       return;
     }
-    if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
-      return;
-    }
     if (newPassword.length < 6) {
       setError('Password must be at least 6 characters long.');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match.');
       return;
     }
     

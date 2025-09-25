@@ -1,5 +1,5 @@
 import React from 'react';
-import { TouristScreen } from '../../types';
+import { TouristScreen, Tourist } from '../../types';
 import { ShieldCheckIcon } from '../../constants';
 import DarkModeToggle from '../shared/DarkModeToggle';
 import { TranslationKey } from '../../translations';
@@ -12,9 +12,12 @@ interface MobileHeaderProps {
     onToggleDarkMode: () => void;
     t: (key: TranslationKey) => string;
     isTracking: boolean;
+    currentUser: Tourist;
 }
 
-const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, setActiveScreen, isDarkMode, onToggleDarkMode, t, isTracking }) => {
+const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, setActiveScreen, isDarkMode, onToggleDarkMode, t, isTracking, currentUser }) => {
+    
+    const defaultPfp = 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg';
     
     const getTitle = () => {
         switch(activeScreen) {
@@ -34,7 +37,7 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, 
             <div className="w-10 h-10 flex items-center justify-start">
               {activeScreen === 'Home' ? (
                   <button onClick={() => setActiveScreen('Profile')}>
-                    <img src="https://picsum.photos/id/1027/200/200" alt="User" className="w-10 h-10 rounded-full"/>
+                    <img src={currentUser.profilePictureUrl || defaultPfp} alt="User" className="w-10 h-10 rounded-full object-cover"/>
                   </button>
               ) : (
                   <button onClick={() => setActiveScreen('Home')} className="p-2 -ml-2">

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { TouristScreen, Tourist } from '../../types';
 import MobileHeader from './MobileHeader';
@@ -29,18 +30,33 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
   const [isTracking, setIsTracking] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (navigator.geolocation) {
       watchIdRef.current = navigator.geolocation.watchPosition(
         (position) => {
+          setLocationError(null);
           const { latitude, longitude } = position.coords;
           onLocationUpdate({ lat: latitude, lng: longitude });
           setIsTracking(true);
         },
         (error) => {
-          console.error("Geolocation error", error);
+          let message = 'An unknown error occurred while fetching your location.';
+          switch (error.code) {
+            case error.PERMISSION_DENIED:
+              message = 'Location permission denied. Please enable it in your browser settings to use location features.';
+              break;
+            case error.POSITION_UNAVAILABLE:
+              message = 'Location information is currently unavailable. Please check your device settings.';
+              break;
+            case error.TIMEOUT:
+              message = 'The request to get user location timed out.';
+              break;
+          }
+          console.error(`Geolocation error: ${error.message}`);
+          setLocationError(message);
           setIsTracking(false);
         },
         {
@@ -49,6 +65,8 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
           maximumAge: 0,
         }
       );
+    } else {
+      setLocationError("Geolocation is not supported by this browser.");
     }
 
     return () => {
@@ -95,6 +113,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
             isTracking={isTracking}
+            locationError={locationError}
             t={t}
         />
         {isMenuOpen && <MobileMenu 
@@ -107,6 +126,11 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
             t={t}
         />}
         <main className="flex-1 overflow-y-auto bg-light-200 dark:bg-dark-900">
+            {locationError && (
+              <div className="p-3 bg-red-100 dark:bg-red-900/50 border-b border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium text-center">
+                <span className="font-bold">Location Error:</span> {locationError}
+              </div>
+            )}
             {renderScreen()}
         </main>
       </div>

@@ -22,8 +22,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onNavigateToRegister
     const [password, setPassword] = useState('');
 
     const handleTouristLogin = async () => {
-        if (!email || !password) {
-            setLocalError('Email and password are required.');
+        if (!email.trim()) {
+            setLocalError('Email is required.');
+            return;
+        }
+        if (!/\S+@\S+\.\S+/.test(email)) {
+            setLocalError('Please enter a valid email address.');
+            return;
+        }
+        if (!password) {
+            setLocalError('Password is required.');
             return;
         }
         setLocalError('');
@@ -57,8 +65,12 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onNavigateToRegister
     const [password, setPassword] = useState('admin123');
 
      const handleAdminLogin = async () => {
-        if (!email || !password) {
-            setLocalError('Email and password are required.');
+        if (!email.trim()) {
+            setLocalError('Admin email is required.');
+            return;
+        }
+        if (!password) {
+            setLocalError('Password is required.');
             return;
         }
         setLocalError('');

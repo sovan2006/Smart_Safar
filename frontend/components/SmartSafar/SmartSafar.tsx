@@ -101,6 +101,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
     <div className="w-full min-h-screen bg-light-200 dark:bg-dark-900 flex justify-center">
       <div className="w-full lg:max-w-5xl bg-light-100 dark:bg-dark-900 min-h-screen flex flex-col relative shadow-lg">
         <MobileHeader 
+            currentUser={currentUser}
             onMenuClick={() => setIsMenuOpen(true)}
             activeScreen={activeScreen}
             setActiveScreen={setActiveScreen}

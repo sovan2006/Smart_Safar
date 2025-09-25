@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { TouristScreen, Tourist } from '../../types';
 import { LogoutIcon } from '../../constants';
@@ -15,6 +14,7 @@ interface MobileMenuProps {
 }
 
 const MobileMenu: React.FC<MobileMenuProps> = ({ currentUser, onClose, setActiveScreen, onLogout, language, setLanguage, t }) => {
+    const defaultPfp = 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg';
 
     const handleNavigation = (screen: TouristScreen) => {
         setActiveScreen(screen);
@@ -26,7 +26,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ currentUser, onClose, setActive
             <div className="absolute top-0 right-0 h-full w-4/5 max-w-xs bg-light-100 dark:bg-dark-800 shadow-lg p-6 flex flex-col" onClick={(e) => e.stopPropagation()}>
                 <div className="flex items-center justify-between pb-4 border-b border-light-200 dark:border-dark-700">
                      <div className="flex items-center space-x-3">
-                        <img src="https://picsum.photos/id/1027/200/200" alt={currentUser.fullName} className="w-12 h-12 rounded-full"/>
+                        <img src={currentUser.profilePictureUrl || defaultPfp} alt={currentUser.fullName} className="w-12 h-12 rounded-full object-cover"/>
                         <span className="font-bold text-lg text-gray-800 dark:text-gray-200">{currentUser.fullName}</span>
                     </div>
                     <button onClick={onClose} className="text-gray-700 dark:text-gray-300 text-2xl">&times;</button>

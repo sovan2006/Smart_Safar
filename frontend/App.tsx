@@ -102,9 +102,10 @@ const App: React.FC = () => {
         if (!response.ok) {
           throw new Error(data.message || 'Login failed');
         }
-        localStorage.setItem('token', data.token);
-        setToken(data.token);
-        setCurrentUser(data);
+        const { token, ...user } = data;
+        localStorage.setItem('token', token);
+        setToken(token);
+        setCurrentUser(user as Tourist);
         setView('Tourist');
       } catch (error) {
         setLoginError(error instanceof Error ? error.message : 'An unknown error occurred.');
