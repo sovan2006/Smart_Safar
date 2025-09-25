@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from 'react';
 import { TouristScreen, Tourist } from '../../types';
 import MobileHeader from './MobileHeader';
@@ -31,6 +32,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [language, setLanguage] = useState<Language>('en');
   const [isDisplayingTracking, setIsDisplayingTracking] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
   const watchIdRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -38,16 +40,32 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
       if (navigator.geolocation && watchIdRef.current === null) {
         watchIdRef.current = navigator.geolocation.watchPosition(
           (position) => {
+            setLocationError(null);
             const { latitude, longitude } = position.coords;
             onLocationUpdate({ lat: latitude, lng: longitude });
             setIsDisplayingTracking(true);
           },
           (error) => {
-            console.error("Geolocation error", error);
+            let message = 'An unknown error occurred while fetching your location.';
+            switch (error.code) {
+              case error.PERMISSION_DENIED:
+                message = 'Location permission denied. Please enable it in your browser settings to use location features.';
+                break;
+              case error.POSITION_UNAVAILABLE:
+                message = 'Location information is currently unavailable. Please check your device settings.';
+                break;
+              case error.TIMEOUT:
+                message = 'The request to get user location timed out.';
+                break;
+            }
+            console.error(`Geolocation error: ${error.message}`);
+            setLocationError(message);
             setIsDisplayingTracking(false);
           },
           { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
         );
+      } else if (!navigator.geolocation) {
+         setLocationError("Geolocation is not supported by this browser.");
       }
     };
 
@@ -108,6 +126,7 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
             isDarkMode={isDarkMode}
             onToggleDarkMode={onToggleDarkMode}
             isTracking={isDisplayingTracking}
+            locationError={locationError}
             t={t}
         />
         {isMenuOpen && <MobileMenu 
@@ -120,6 +139,11 @@ const SmartSafar: React.FC<SmartSafarProps> = ({ currentUser, onLogout, isDarkMo
             t={t}
         />}
         <main className="flex-1 overflow-y-auto bg-light-200 dark:bg-dark-900">
+            {locationError && (
+              <div className="p-3 bg-red-100 dark:bg-red-900/50 border-b border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 text-sm font-medium text-center">
+                <span className="font-bold">Location Error:</span> {locationError}
+              </div>
+            )}
             {renderScreen()}
         </main>
       </div>

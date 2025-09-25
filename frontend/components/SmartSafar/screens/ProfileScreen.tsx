@@ -1,5 +1,5 @@
 import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
-import { TouristScreen, Tourist } from '../../../types';
+import { TouristScreen, Tourist, EmergencyContact } from '../../../types';
 import CameraCapture from '../../shared/CameraCapture';
 
 interface ProfileScreenProps {

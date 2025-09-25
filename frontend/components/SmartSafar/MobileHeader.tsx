@@ -1,6 +1,6 @@
 import React from 'react';
 import { TouristScreen, Tourist } from '../../types';
-import { ShieldCheckIcon } from '../../constants';
+import { ShieldCheckIcon, AlertTriangleIcon } from '../../constants';
 import DarkModeToggle from '../shared/DarkModeToggle';
 import { TranslationKey } from '../../translations';
 
@@ -12,10 +12,11 @@ interface MobileHeaderProps {
     onToggleDarkMode: () => void;
     t: (key: TranslationKey) => string;
     isTracking: boolean;
+    locationError: string | null;
     currentUser: Tourist;
 }
 
-const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, setActiveScreen, isDarkMode, onToggleDarkMode, t, isTracking, currentUser }) => {
+const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, setActiveScreen, isDarkMode, onToggleDarkMode, t, isTracking, locationError, currentUser }) => {
     
     const defaultPfp = 'https://st3.depositphotos.com/6672868/13701/v/450/depositphotos_137014128-stock-illustration-user-profile-icon.jpg';
     
@@ -49,10 +50,15 @@ const MobileHeader: React.FC<MobileHeaderProps> = ({ onMenuClick, activeScreen, 
             </div>
 
             <div className="flex items-center space-x-1 text-primary-600 font-bold text-lg">
-                 {isTracking && (
+                 {isTracking && !locationError && (
                     <span title="Location tracking is active" className="relative flex h-3 w-3 mr-2">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                         <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                    </span>
+                 )}
+                 {locationError && (
+                    <span title={locationError} className="mr-2 text-red-500">
+                        <AlertTriangleIcon className="w-5 h-5" />
                     </span>
                  )}
                  {activeScreen === 'Home' && (
