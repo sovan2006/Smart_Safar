@@ -1,12 +1,12 @@
-
 import React, { useState, useRef, ChangeEvent, FormEvent } from 'react';
-import { TouristScreen, Tourist } from '../../../types';
+import { TouristScreen, Tourist, EmergencyContact } from '../../../types';
 import CameraCapture from '../../shared/CameraCapture';
 
 interface ProfileScreenProps {
     currentUser: Tourist;
     onLogout: () => void;
     setActiveScreen: (screen: TouristScreen) => void;
+    onUpdateUser: (updatedUser: Tourist) => void;
 }
 
 interface UserDetails {
@@ -16,12 +16,6 @@ interface UserDetails {
     dateOfBirth: string;
     fatherName: string;
     motherName: string;
-}
-
-interface EmergencyContact {
-    id: number;
-    name: string;
-    phone: string;
 }
 
 const ProfileModal: React.FC<{
@@ -47,7 +41,7 @@ const ProfileModal: React.FC<{
     );
 };
 
-const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, setActiveScreen }) => {
+const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, setActiveScreen, onUpdateUser }) => {
     const [pfpSrc, setPfpSrc] = useState('https://picsum.photos/id/1027/200/200');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCameraOpen, setIsCameraOpen] = useState(false);
@@ -63,10 +57,8 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
         motherName: currentUser.motherName || '',
     });
 
-    const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([
-        { id: 1, name: 'Jane Doe (Spouse)', phone: '+1 987 654 3210' }
-    ]);
     const [newContact, setNewContact] = useState({ name: '', phone: '' });
+    const emergencyContacts = currentUser.emergencyContacts || [];
 
     const handleUserDetailsChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -75,19 +67,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
 
     const handleSaveDetails = () => {
         setIsEditing(false);
-        // Here you would typically make an API call to save the user details
+        const updatedUser: Tourist = {
+            ...currentUser,
+            fullName: userDetails.name,
+            email: userDetails.email,
+            mobileNumber: userDetails.phone,
+            dateOfBirth: userDetails.dateOfBirth,
+            fatherName: userDetails.fatherName,
+            motherName: userDetails.motherName,
+        };
+        onUpdateUser(updatedUser);
     };
     
     const handleAddNewContact = (e: FormEvent) => {
         e.preventDefault();
         if(newContact.name && newContact.phone) {
-            setEmergencyContacts(prev => [...prev, {id: Date.now(), ...newContact}]);
+            const updatedContacts = [...emergencyContacts, {id: Date.now(), ...newContact}];
+            onUpdateUser({ ...currentUser, emergencyContacts: updatedContacts });
             setNewContact({name: '', phone: ''});
         }
     }
     
     const handleRemoveContact = (id: number) => {
-        setEmergencyContacts(prev => prev.filter(contact => contact.id !== id));
+        const updatedContacts = emergencyContacts.filter(contact => contact.id !== id);
+        onUpdateUser({ ...currentUser, emergencyContacts: updatedContacts });
     }
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -167,7 +170,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = ({ currentUser, onLogout, se
                         </div>
                         <div>
                             <label className="text-xs text-gray-500">Email Address</label>
-                            <input name="email" type="email" value={userDetails.email} onChange={handleUserDetailsChange} className="w-full p-2 border border-light-300 dark:border-dark-600 bg-light-200 dark:bg-dark-700 rounded-lg mt-1" />
+                            <input name="email" type="email" value={userDetails.email} readOnly className="w-full p-2 border border-light-300 dark:border-dark-600 bg-light-200 dark:bg-dark-700 rounded-lg mt-1 cursor-not-allowed opacity-70" />
                         </div>
                          <div>
                             <label className="text-xs text-gray-500">Phone Number</label>

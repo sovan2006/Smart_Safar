@@ -6,6 +6,7 @@ interface MapPin {
   y: number;
   color: string;
   label?: string;
+  isLive?: boolean;
 }
 
 interface MapViewProps {
@@ -208,7 +209,8 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
         {/* Pins */}
         {sortedPins.map((pin) => {
           const isSelected = pin.id !== undefined && pin.id === selectedPinId;
-          const showLabel = pin.label && (isSelected || alwaysShowLabels);
+          const showLabel = pin.label && (isSelected || pin.isLive || alwaysShowLabels);
+          const shouldPulse = isSelected || pin.isLive;
           
           const handleInteraction = (e: React.MouseEvent | React.KeyboardEvent) => {
               if (e.type === 'click' || (e.type === 'keydown' && (e as React.KeyboardEvent).key === 'Enter')) {
@@ -231,7 +233,7 @@ const MapView: React.FC<MapViewProps> = ({ pins = [], className = '', onPinClick
               tabIndex={0}
             >
               <g className="pin-content" style={{ transform: isSelected ? 'scale(1.4) translateY(-4px)' : 'scale(1)'} as React.CSSProperties}>
-                {isSelected && <circle cx="0" cy="-15" r="8" className="selected-pin-glow" style={{'--selected-glow-color': pin.color} as React.CSSProperties} />}
+                {shouldPulse && <circle cx="0" cy="-15" r="8" className="selected-pin-glow" style={{'--selected-glow-color': pin.color} as React.CSSProperties} />}
                 <g filter="url(#drop-shadow)">
                   <path d="M0,0 C-3,-6 -10,-20 0,-20 C10,-20 3,-6 0,0 Z" fill={pin.color} />
                   <circle cx="0" cy="-15" r="4" fill="white" />

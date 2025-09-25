@@ -56,10 +56,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     await user.save();
     
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    res.status(201).json(userResponse);
+    res.status(201).json(user);
   } catch (error) {
     console.error('Registration Error:', error.message);
     res.status(500).json({ message: 'Server error during registration' });
@@ -87,10 +84,7 @@ app.post('/api/auth/login', async (req, res) => {
     const payload = { id: user.id };
     const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
     
-    const userResponse = user.toObject();
-    delete userResponse.password;
-
-    res.json({ token, ...userResponse });
+    res.json({ token, ...user.toJSON() });
   } catch (error) {
     console.error('Login Error:', error.message);
     res.status(500).json({ message: 'Server error during login' });
@@ -168,6 +162,32 @@ app.put('/api/users/location', authMiddleware, async (req, res) => {
         res.status(500).json({ message: 'Server error updating location' });
     }
 });
+
+app.put('/api/users/profile', authMiddleware, async (req, res) => {
+    // Exclude fields that shouldn't be updated from here or are handled separately
+    const { password, email, ...updateData } = req.body;
+
+    try {
+        const updatedTourist = await Tourist.findByIdAndUpdate(
+            req.user.id,
+            { $set: updateData },
+            { new: true, runValidators: true }
+        ).select('-password');
+
+        if (!updatedTourist) {
+            return res.status(404).json({ message: 'Tourist not found' });
+        }
+
+        res.json(updatedTourist);
+    } catch (error) {
+        console.error('Update Profile Error:', error.message);
+        if (error.name === 'ValidationError') {
+            return res.status(400).json({ message: error.message });
+        }
+        res.status(500).json({ message: 'Server error updating profile' });
+    }
+});
+
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

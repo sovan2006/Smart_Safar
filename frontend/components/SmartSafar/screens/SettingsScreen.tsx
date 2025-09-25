@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 
-const Toggle: React.FC<{ label: string, description?: string }> = ({ label, description }) => {
-    const [isOn, setIsOn] = useState(false);
+const Toggle: React.FC<{ label: string, description?: string, isOn: boolean, onToggle: () => void }> = ({ label, description, isOn, onToggle }) => {
     return (
         <div className="flex items-center justify-between py-3 border-b border-light-200 dark:border-dark-700 last:border-b-0">
             <div>
                 <p className="font-semibold text-gray-800 dark:text-gray-200">{label}</p>
                 {description && <p className="text-sm text-gray-500 dark:text-gray-400">{description}</p>}
             </div>
-            <button onClick={() => setIsOn(!isOn)} className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${isOn ? 'bg-primary-600' : 'bg-gray-300 dark:bg-dark-700'}`}>
+            <button onClick={onToggle} className={`relative inline-flex items-center h-6 rounded-full w-11 transition-colors ${isOn ? 'bg-primary-600' : 'bg-gray-300 dark:bg-dark-700'}`}>
                 <span className={`inline-block w-4 h-4 transform bg-white rounded-full transition-transform ${isOn ? 'translate-x-6' : 'translate-x-1'}`} />
             </button>
         </div>
@@ -17,18 +16,30 @@ const Toggle: React.FC<{ label: string, description?: string }> = ({ label, desc
 
 interface SettingsScreenProps {
     onLogout: () => void;
+    isTrackingEnabled: boolean;
+    onToggleTracking: () => void;
 }
 
-const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout }) => {
+const SettingsScreen: React.FC<SettingsScreenProps> = ({ onLogout, isTrackingEnabled, onToggleTracking }) => {
     return (
         <div className="p-4 space-y-4">
             <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100">Settings & Support</h1>
             
             <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
+                <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">Privacy Settings</h2>
+                <Toggle 
+                    label="Real-time Location Tracking" 
+                    description="Allow SmartSafar to track your location for safety."
+                    isOn={isTrackingEnabled}
+                    onToggle={onToggleTracking}
+                />
+            </div>
+
+            <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">
                 <h2 className="text-lg font-semibold mb-2 text-gray-800 dark:text-gray-200">Alert Preferences</h2>
-                <Toggle label="High-Risk Zone Alerts" description="Notify me when I enter a high-risk area." />
-                <Toggle label="Weather Updates" description="Receive alerts for significant weather changes." />
-                <Toggle label="Itinerary Changes" description="Get notified about updates to my daily plan." />
+                <Toggle label="High-Risk Zone Alerts" description="Notify me when I enter a high-risk area." isOn={true} onToggle={() => {}} />
+                <Toggle label="Weather Updates" description="Receive alerts for significant weather changes." isOn={true} onToggle={() => {}}/>
+                <Toggle label="Itinerary Changes" description="Get notified about updates to my daily plan." isOn={false} onToggle={() => {}}/>
             </div>
 
             <div className="bg-light-100 dark:bg-dark-800 p-4 rounded-xl shadow-sm">

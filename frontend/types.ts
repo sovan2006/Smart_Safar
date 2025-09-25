@@ -33,6 +33,7 @@ export interface Tourist {
   dateOfBirth?: string;
   fatherName?: string;
   motherName?: string;
+  isTrackingEnabled?: boolean;
   location?: {
     lat: number;
     lng: number;

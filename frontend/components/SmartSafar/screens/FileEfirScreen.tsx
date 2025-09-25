@@ -1,5 +1,10 @@
 import React, { useState } from 'react';
 import { GoogleGenAI, Type } from "@google/genai";
+import { Tourist } from '../../../types';
+
+interface FileEfirScreenProps {
+    currentUser: Tourist;
+}
 
 const StepIndicator: React.FC<{ step: number, currentStep: number, label: string }> = ({ step, currentStep, label }) => {
     const isActive = step === currentStep;
@@ -15,7 +20,7 @@ const StepIndicator: React.FC<{ step: number, currentStep: number, label: string
     );
 };
 
-const FileEfirScreen: React.FC = () => {
+const FileEfirScreen: React.FC<FileEfirScreenProps> = ({ currentUser }) => {
     const [step, setStep] = useState(1);
     const totalSteps = 4;
 
@@ -38,11 +43,24 @@ const FileEfirScreen: React.FC = () => {
         setIsAnalyzing(true);
         setAnalysisError('');
 
+        const locationContext = currentUser.location
+            ? `The user's current location is approximately at latitude ${currentUser.location.lat.toFixed(5)}, longitude ${currentUser.location.lng.toFixed(5)}. Infer a common name for this location (e.g., "near Connaught Place, New Delhi") and use that as the incident location, unless the user explicitly specifies a different one in their narrative.`
+            : `The user's location is not available. You must extract the location from the user's narrative. If no location is mentioned, leave the 'location' field in the JSON response as an empty string.`;
+
         try {
             const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
             const prompt = `You are an intelligent assistant helping a tourist file a police report (E-FIR). Analyze the following incident description provided by the user. Extract the key information and return it as a JSON object.
+
 User's description: "${narrative}"
-The JSON object must match the required schema. For the incidentType, choose the most appropriate category. For the description, create a clear and formal summary suitable for a police report. If the user mentions a date and time, extract it and format it as YYYY-MM-DDTHH:mm.`;
+
+Contextual Information:
+${locationContext}
+
+The JSON object must match the required schema.
+- For 'incidentType', choose the most appropriate category from 'Theft', 'Assault', or 'Lost Item'.
+- For 'location', determine the location based on the contextual information and user narrative.
+- For 'description', create a clear and formal summary suitable for a police report based on the narrative.
+- If the user mentions a date and time, extract it for 'dateTime' and format it as YYYY-MM-DDTHH:mm.`;
             
             const response = await ai.models.generateContent({
                 model: 'gemini-2.5-flash',

@@ -34,7 +34,7 @@ export const UsersIcon: React.FC<{className?: string}> = ({className}) => (
 );
 export const SettingsIcon: React.FC<{className?: string}> = ({className}) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
+        <path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42.12-.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59-1.69.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
     </svg>
 );
 export const SearchIcon: React.FC<{className?: string}> = ({className}) => (
@@ -249,35 +249,4 @@ export const MOCK_TOURIST_ALERTS: Alert[] = [
     { id: 1, title: 'Weather Warning', description: 'Heavy rain expected in the afternoon. Plan accordingly.', time: '1h ago', type: 'alert' },
     { id: 2, title: 'Itinerary Update', description: 'Your visit to the museum has been confirmed for 2 PM.', time: '3h ago', type: 'info' },
     { id: 3, title: 'Road Closure', description: 'Main Street is closed for a local event until 6 PM.', time: '4h ago', type: 'warning' },
-];
-
-export const MOCK_TOURISTS_DATA: Tourist[] = [
-  { 
-    fullName: 'Tania T.', 
-    mobileNumber: '+1 123 456 7890', 
-    email: 'tourist@smartsafar.com', 
-    password: 'password123',
-    touristId: 'T-48291',
-    nationality: 'United States',
-    dateOfBirth: '1990-08-15',
-    fatherName: 'Ramesh T.',
-    motherName: 'Sunita T.',
-    location: { lat: 28.6139, lng: 77.2090, timestamp: Date.now() },
-    emergencyContacts: [
-      { id: 1, name: 'Ramesh T. (Father)', phone: '+11234567891' },
-      { id: 2, name: 'Sunita T. (Mother)', phone: '+11234567892' }
-    ]
-  },
-  { 
-    fullName: 'John Doe', 
-    mobileNumber: '+44 20 7946 0958', 
-    email: 'john.doe@example.com', 
-    password: 'password456',
-    touristId: 'T-12345',
-    nationality: 'British',
-    dateOfBirth: '1985-05-20',
-    fatherName: 'Richard Doe',
-    motherName: 'Jane Doe',
-    location: { lat: 28.6304, lng: 77.2177, timestamp: Date.now() }
-  }
 ];

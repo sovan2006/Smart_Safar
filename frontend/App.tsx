@@ -169,6 +169,38 @@ const App: React.FC = () => {
       }
     }
   };
+  
+  const handleUpdateUser = async (updatedUserData: Tourist) => {
+    if (!token) {
+      setLoginError("You must be logged in to update your profile.");
+      return;
+    }
+    try {
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(updatedUserData),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to update profile.');
+      }
+      setCurrentUser(data);
+      setTourists(prev => prev.map(t => t.email === data.email ? data : t));
+    } catch (error) {
+      console.error("Profile update error:", error);
+      // Optionally, set an error state to show in the UI
+    }
+  };
+
+  const handleToggleTracking = async () => {
+    if (!currentUser) return;
+    const updatedUser = { ...currentUser, isTrackingEnabled: !currentUser.isTrackingEnabled };
+    await handleUpdateUser(updatedUser);
+  };
 
   const handleSwitchToTouristView = () => {
     if (tourists.length > 0) {
@@ -195,7 +227,7 @@ const App: React.FC = () => {
       case 'Admin':
         return <AdminDashboard tourists={tourists} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onSwitchToTouristView={handleSwitchToTouristView} />;
       case 'Tourist':
-        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
+        return currentUser ? <SmartSafar currentUser={currentUser} onLogout={handleLogout} isDarkMode={isDarkMode} onToggleDarkMode={toggleDarkMode} onLocationUpdate={handleLocationUpdate} onUpdateUser={handleUpdateUser} isTrackingEnabled={currentUser.isTrackingEnabled || false} onToggleTracking={handleToggleTracking} /> : <LoginScreen {...loginProps} error={'Session expired. Please log in again.'} />;
       default:
         return <LoginScreen {...loginProps} error={loginError} />;
     }
@@ -216,7 +248,6 @@ const App: React.FC = () => {
   return (
     <div className={`font-sans ${getAppBg()} transition-colors duration-300`}>
       {renderContent()}
-      {/* FIX: Pass currentUser prop to SOSButton to fix missing property error. */}
       {view === 'Tourist' && <SOSButton currentUser={currentUser} />}
     </div>
   );
